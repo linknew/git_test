@@ -15,3 +15,12 @@ command "add/commit/push" shall be used.
 This is a puzzle, interesting & confuzed.
 Put the answer into the file created by youself yestday
 then, push it to remote repository.
+
+[Task-3]
+list all your submmit to your own file.
+
+Tips,
+Command 'log' will be used.
+The '--committer=' option should be helpful.
+You can try '--pretty=oneline' to look what will happen.
+
