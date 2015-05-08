@@ -1,0 +1,8 @@
+git pull
+vim xiangbin.feng
+put the answer into xiangbin.feng
+:wq
+git add xiangbin.feng
+git commit -m "my second task"
+git push
+
