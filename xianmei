@@ -1,3 +1,8 @@
+Task 1
+new a file, then submit
+
+
+Task 2
 git pull
 vim xianmei
 i
@@ -5,3 +10,19 @@ interesting
 git add xianmei
 git commit -m "2. xianmei test"
 git push
+
+
+Task 3
+commit b81b4c49ce36ecf2ad838d4fed1a39f552631244
+Author: xianmei.liao <xianmei.liao@tpv-tech.com>
+Date:   Fri May 8 10:48:48 2015 +0800
+
+    2. xianmei test
+
+commit b724ad25948f6f25c016923173f2d9b1bafe572b
+Author: xianmei.liao <xianmei.liao@tpv-tech.com>
+Date:   Wed May 6 17:06:48 2015 +0800
+
+    1.xianmei test
+
+

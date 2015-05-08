@@ -12,3 +12,16 @@ git add youming,huang
 git commit -m "youming.huang task2"
 git pull
 git push
+
+Task 3:
+commit 21ca7a346cf5dbf151c32c941fffb4029e62d5cd
+Author: youming.huang <youming.huang@tpv-tech.com>
+Date:   Fri May 8 10:48:32 2015 +0800
+
+    youming.huang task 2
+
+commit 814ae9bf2cd1a43f97c09e6475b33db2dd342a2f
+Author: youming.huang <youming.huang@tpv-tech.com>
+Date:   Wed May 6 16:59:08 2015 +0800
+
+    make a new file

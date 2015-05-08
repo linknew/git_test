@@ -1,3 +1,4 @@
+Task2:
 git pull
 vim xiangbin.feng
 put the answer into xiangbin.feng
@@ -6,4 +7,29 @@ git add xiangbin.feng
 git commit -m "my second task"
 git pull
 git push
+
+
+Task 3:
+$git log --committer=xiangbin.feng --pretty=oneline
+
+9f24242f637dc6cb8f63fb69c5f5b75748719b6c Merge branch 'master' of github.com:linknew/git_test
+289dd358e004ed15557041ebcda59b0a13bb9877 my third task
+5d9bb053da2e293afe48e5543e6360953ca21a39 my second task
+80c3eb9ae1db81af2010b46c5ada62e6945be51e my second task
+c024ce77570e9e9e8847e5d9573a50e823bb6177 Merge branch 'master' of github.com:linknew/git_test
+6de41a94259e8ffb945b143faa3e74cdb104c4aa xiangbin's task is done
+516af6e4583bb0bcf055469edca923c17785ef1d modify xiangbin.cpp
+df612292422d5e6cc200d1f74fa3d54ce4bfa5cf my first git task
+
+
+$git log --committer=xiangbin.feng --pretty=format:"%h - %an, %ar : %s"
+
+9f24242 - xiangbin.feng, 8 minutes ago : Merge branch 'master' of github.com:linknew/git_test
+289dd35 - xiangbin.feng, 9 minutes ago : my third task
+5d9bb05 - xiangbin.feng, 4 hours ago : my second task
+80c3eb9 - xiangbin.feng, 4 hours ago : my second task
+c024ce7 - xiangbin.feng, 2 days ago : Merge branch 'master' of github.com:linknew/git_test
+6de41a9 - xiangbin.feng, 2 days ago : xiangbin's task is done
+516af6e - xiangbin.feng, 2 days ago : modify xiangbin.cpp
+df61229 - xiangbin.feng, 2 days ago : my first git task
 
