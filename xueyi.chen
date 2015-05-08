@@ -1,7 +1,17 @@
+Task1:
+1.touch xueyi.chen
+2.git add xueyi.chen
+3.git commit -m "create by xueyi.chen"
+4.git push
+
 Task2:
 1.vim xueyi.chen
 2.edit the file,enter the answer
 3.:wq
 4.git add xueyi.chen
-5.git commit -m"Modify Task2 by xueyi.chen"
+5.git commit -m "Modify Task2 by xueyi.chen"
 6.git push
+
+Task3:
+1.git log --committer=xueyi.chen --pretty=oneline
+
