@@ -1,5 +1,15 @@
+task 2
 edit jiesen.liu
 git add jiesen.liu
 git commit -m 'jiesen.liu second task'
 git pull
 git push
+---------------------------------------------------------------
+task 3
+git log --pretty=oneline --committer=jiesen.liu
+3f6282012c161c01403549fe9b9783bf08f477e3 Merge branch 'master' of github.com:linknew
+6e3cf791cc8b765309b0ab34fe9b96dd69e693b9 jiesen.liu second task
+ad4ab806804f7b95d8a07cd68012635f70fdadc6 Merge branch 'master' of github.com:linknew
+1c28e77d902588c9c03413a6805d80de054e8839 Merge branch 'master' of github.com:linknew
+c72fd1880d4b4876d7fb638dffad0ed0fd444516 jiesen.liu add first file
+---------------------------------------------------------------
