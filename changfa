@@ -1,2 +1,9 @@
-how to deal with conflict
-how to use external merge tool
+Task 2:
+git pull
+vi changfa
+this is task2 
+put my answer to the file
+git add changfa
+git commit -m "changfa task2"
+git pull
+git push
