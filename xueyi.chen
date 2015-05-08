@@ -1,7 +1,7 @@
 Task2:
 1.vim xueyi.chen
-2.edit the file
+2.edit the file,enter the answer
 3.:wq
 4.git add xueyi.chen
 5.git commit -m"Modify Task2 by xueyi.chen"
-6.git push origin
+6.git push
