@@ -1,0 +1,7 @@
+git pull
+vim xianmei
+i
+interesting
+git add xianmei
+git commit -m "2. xianmei test"
+git push
