@@ -1,1 +1,14 @@
-this is youming.huang
+task 1:
+this is youming.huang 
+
+
+Task 2:
+git pull
+vim youming.huang
+this is task2 
+put my answer to the file
+it is so puzzed question,but I like it.
+git add youming,huang
+git commit -m "youming.huang task2"
+git pull
+git push
