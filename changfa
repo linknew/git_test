@@ -7,3 +7,15 @@ git add changfa
 git commit -m "changfa task2"
 git pull
 git push
+
+Task 3:
+git log --committer=changfa.huang --pretty=oneline 
+dd3c1e28e116d047b69aa06c17a85f53a43b3f80 changfa task2
+356f142cf38904a1df170566aea4bc245270aed6 Merge branch 'master' of github.com:linkne
+33693e42f9b8a66d763ad44869fbbb020b00085a Merge branch 'master' of github.com:linkne
+8acca57ff38bc867a68cac38dc32441f853071a2 Merge branch 'master' of github.com:linkne
+775bde848c8bcd9c64701c0e549b4de744491eea Merge branch 'master' of github.com:linkne
+5cfa3608b1773e59e3047749e7ab12a3d964bb65 Merge branch 'master' of github.com:linkne
+ccb8480b6fb3235d2601c49620bcc5a7e91aca9d Task 2 by changfa
+728817ba85dfc54c32ea6282382b59f8a1f6a5ad Merge branch 'master' of github.com:linkne
+d2568992c50b1ba1b3e7544e487f4aa77102e86d test

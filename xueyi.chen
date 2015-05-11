@@ -15,3 +15,12 @@ Task2:
 Task3:
 1.git log --committer=xueyi.chen --pretty=oneline
 
+  0ff7edc885cab247d1dff9473f8436d57af2800e update task by xueyi.chen
+  ac68e3b9434dd49fc9f771f9e8588b519a769242 remodify task2
+  e90ebe868a802e27adcd39f696a7f7ef252ff718 Merge branch 'master' of github.com:linknew/git_test
+  d91cb80341c9ec3862cabde7787435ed9ce61efb Merge branch 'master' of github.com:linknew/git_test
+  7ffab89f32da3b6b8a6bae3e24cb5a96857eb18f modify task2 by xueyi.chen
+  bfd2a32be035698482cb2d42ed6a9e53daf74bba task 2
+  0e4ad5de691e86f6a1c7690a0ae3b440985a75e3 Merge branch 'master' of github.com:linknew/git_test
+  2e9766752241b429f34f5957bbdbdd2b4fcc87bb add by xueyi.chen
+
