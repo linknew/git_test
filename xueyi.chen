@@ -24,3 +24,11 @@ Task3:
   0e4ad5de691e86f6a1c7690a0ae3b440985a75e3 Merge branch 'master' of github.com:linknew/git_test
   2e9766752241b429f34f5957bbdbdd2b4fcc87bb add by xueyi.chen
 
+Task4:
+1. more ReadMe 
+2. git log --pretty=oneline --committer=xueyi.chen
+3. git checkout 2e9766752241b429f34f5957bbdbdd2b4fcc87bb -- xueyi.chen
+
+4. git reset HEAD -- xueyi.chen
+5. git checkout -- xueyi.chen
+
