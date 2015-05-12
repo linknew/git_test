@@ -33,3 +33,37 @@ c024ce7 - xiangbin.feng, 2 days ago : Merge branch 'master' of github.com:linkne
 516af6e - xiangbin.feng, 2 days ago : modify xiangbin.cpp
 df61229 - xiangbin.feng, 2 days ago : my first git task
 
+Task 4, Steps:
+1、
+Command:git log --committer=xiangbin.feng --pretty=oneline
+Result :
+9f24242f637dc6cb8f63fb69c5f5b75748719b6c Merge branch 'master' of github.com:lin
+289dd358e004ed15557041ebcda59b0a13bb9877 my third task
+5d9bb053da2e293afe48e5543e6360953ca21a39 my second task
+80c3eb9ae1db81af2010b46c5ada62e6945be51e my second task
+c024ce77570e9e9e8847e5d9573a50e823bb6177 Merge branch 'master' of github.com:lin
+6de41a94259e8ffb945b143faa3e74cdb104c4aa xiangbin's task is done
+516af6e4583bb0bcf055469edca923c17785ef1d modify xiangbin.cpp
+df612292422d5e6cc200d1f74fa3d54ce4bfa5cf my first git task
+
+2、Go back to the first commit:
+Command:git checkout df612292422d5e6cc200d1f74fa3d54ce4bfa5cf
+Result :HEAD is now at df61229... my first git task
+
+3、if we back to first commit:
+git log, we can just find df612292422d5e6cc200d1f74fa3d54ce4bfa5cf my first git task.
+if we forget the other commit id.
+we can use the git reflog to find it.
+Result:
+9f24242 HEAD@{0}: checkout: moving from df612292422d5e6cc200d1f74fa3d54ce4bfa5cf to 9f24242f637dc6cb8f63fb69c5f5b75748719b6c
+df61229 HEAD@{1}: checkout: moving from 9f24242f637dc6cb8f63fb69c5f5b75748719b6c to df612292422d5e6cc200d1f74fa3d54ce4bfa5cf
+
+If we want go back to the previous version, :
+Command:git reset --hard HEAD~1
+Result :HEAD is now at 289dd35 my third task
+
+3、Go back to the last commit:
+Command:git checkout 9f24242f637dc6cb8f63fb69c5f5b75748719b6c
+Result :HEAD is now at 9f24242... Merge branch 'master' of github.com:linknew/git_test
+
+
