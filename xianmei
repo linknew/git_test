@@ -13,6 +13,7 @@ git push
 
 
 Task 3
+command: git log xianmei
 commit b81b4c49ce36ecf2ad838d4fed1a39f552631244
 Author: xianmei.liao <xianmei.liao@tpv-tech.com>
 Date:   Fri May 8 10:48:48 2015 +0800
