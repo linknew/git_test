@@ -27,3 +27,42 @@ Date:   Wed May 6 17:06:48 2015 +0800
     1.xianmei test
 
 
+Task 4
+xianmei.liao@xmic4003567:~/git_test$ git log --committer=xianmei --pretty=oneline
+c1ed5a5f0b287f7cd9b1cb18d5b63f61834b8c7a test 3 modified xianmei
+e369db55eeffae21eb8eb64e30e0b9d5f2584dbe 3. xianmei test
+b296fa07e89159b36029288adf685d1c92885731 Merge branch 'master' of github.com:linknew/git_test
+b81b4c49ce36ecf2ad838d4fed1a39f552631244 2. xianmei test
+b724ad25948f6f25c016923173f2d9b1bafe572b 1.xianmei test
+
+go the the first
+xianmei.liao@xmic4003567:~/git_test$ git checkout b724ad25948f6f25c016923173f2d9b1bafe572b
+Note: checking out 'b724ad25948f6f25c016923173f2d9b1bafe572b'.
+
+xianmei.liao@xmic4003567:~/git_test$ git log --committer=xianmei --pretty=oneline
+b724ad25948f6f25c016923173f2d9b1bafe572b 1.xianmei test
+
+go back the master head
+xianmei.liao@xmic4003567:~/git_test$ git checkout master
+Warning: you are leaving 19 commits behind, not connected to
+any of your branches:
+
+  b724ad2 1.xianmei test
+  728817b Merge branch 'master' of github.com:linknew/git_test
+  814ae9b make a new file
+  d256899 test
+ ... and 15 more.
+
+If you want to keep them by creating a new branch, this may be a good time
+to do so with:
+
+ git branch new_branch_name b724ad25948f6f25c016923173f2d9b1bafe572b
+
+Switched to branch 'master'
+
+xianmei.liao@xmic4003567:~/git_test$ git log --committer=xianmei --pretty=oneline
+c1ed5a5f0b287f7cd9b1cb18d5b63f61834b8c7a test 3 modified xianmei
+e369db55eeffae21eb8eb64e30e0b9d5f2584dbe 3. xianmei test
+b296fa07e89159b36029288adf685d1c92885731 Merge branch 'master' of github.com:linknew/git_test
+b81b4c49ce36ecf2ad838d4fed1a39f552631244 2. xianmei test
+b724ad25948f6f25c016923173f2d9b1bafe572b 1.xianmei test
