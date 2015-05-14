@@ -13,3 +13,8 @@ ad4ab806804f7b95d8a07cd68012635f70fdadc6 Merge branch 'master' of github.com:lin
 1c28e77d902588c9c03413a6805d80de054e8839 Merge branch 'master' of github.com:linknew
 c72fd1880d4b4876d7fb638dffad0ed0fd444516 jiesen.liu add first file
 ---------------------------------------------------------------
+task 4
+git checkout c72fd1
+git branch -v
+git checkout master
+---------------------------------------------------------------
