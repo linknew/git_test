@@ -26,4 +26,11 @@ git checkout d2568992c50b1ba1b3e7544e487f4aa77102e86d
 git branch
 git log --committer=changfa.huang --pretty=oneline
 git checkout master
- 
+
+
+Task 6
+git log --committer=min.lee --pretty=oneline
+git checkout 110e98abe6903e8ef6461246f1d4aa4f255643d6
+cat ReadMe
+
+answer: FIVER 
