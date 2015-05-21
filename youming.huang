@@ -28,3 +28,12 @@ Date:   Wed May 6 16:59:08 2015 +0800
 
 Task 5 & 6
 I will tell the answer to the one who pay the more money.
+
+Task 7
+1. rm  * -rf  >> deleted all the file at current workspace
+2. git checkout -- ReadMe xianmei >> get this two file
+3. touch IamUntrackFile  >> touch a new file
+4. echo 'hello' >> ReadMe  >> add 'hello' to ReadMe file
+   echo 'hello' >> xianmei  >> add 'hello' to xiamei file
+5. git add ReadMe >> add ReadMe file to push space
+6. git status >> look the status
