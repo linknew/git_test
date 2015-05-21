@@ -46,3 +46,22 @@ And... if you got his name, also let me know, please...
 --------
 hi, Do my eyes cheated me? I think I saw him just now...
 
+[Task-7]
+I'm a serious man, take everything seriously.
+Let's start the testing.
+Before starting, do the following 8 steps (No mistake acceptable)
+    git reset --hard
+    git checkout master
+    rm  * -rf
+    git checkout -- ReadMe xianmei
+    touch IamUntrackFile
+    echo 'hello' >> ReadMe
+    echo 'hello' >> xianmei
+    git add ReadMe
+Now, input "git status" and press 'enter'.
+There comes the output. Explain them for me~
+
+After that, you can use:
+    rm * -rf
+    git reset --hard
+to recover the environments.

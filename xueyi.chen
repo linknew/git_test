@@ -32,3 +32,10 @@ Task4:
 4. git reset HEAD -- xueyi.chen
 5. git checkout -- xueyi.chen
 
+Task6:
+1.git log --pretty=oneline --committer=min.lee
+2.git diff 'id1' 'id2'
+
+FIVER
+
+

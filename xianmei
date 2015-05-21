@@ -66,3 +66,47 @@ e369db55eeffae21eb8eb64e30e0b9d5f2584dbe 3. xianmei test
 b296fa07e89159b36029288adf685d1c92885731 Merge branch 'master' of github.com:linknew/git_test
 b81b4c49ce36ecf2ad838d4fed1a39f552631244 2. xianmei test
 b724ad25948f6f25c016923173f2d9b1bafe572b 1.xianmei test
+
+
+
+
+
+
+
+Task 6
+answer: FIVE
+
+1. find the Task5
+ git log --commit=min.lee --pretty=oneline
+
+ 110e98abe6903e8ef6461246f1d4aa4f255643d6 task-5 have something need talk to yougit status
+ e66e180c38885ebf01b60f1f8527d1e1a9e966e4 submit task-6
+ 6d543c145d183bdf30d3a4faf53c621dbdd1ae4b submit task-5
+
+2. chekout to Task-5
+git checkout 110e98abe6903e8ef6461246f1d4aa4f255643d6
+
+
+3. Open ReadMe file to find the name
+vim ReadMe
+name: FIVE little FIVE
+
+4. git checkout master
+
+5. git pull
+6. git add xianmei
+7. git commit -m "Task 6, xianmei find the Task5 name "
+8. git push
+
+
+
+
+
+
+
+
+
+
+
+
+
