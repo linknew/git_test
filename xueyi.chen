@@ -38,4 +38,41 @@ Task6:
 
 FIVER
 
+Task7:
+
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#       modified:   ReadMe
+#
+# Changes not staged for commit:
+#   (use "git add/rm <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#       deleted:    changfa
+#       deleted:    jiesen.liu
+#       deleted:    weeklyreport/YouMing.Huang-FW-Weekly-WK19.xlsx
+#       deleted:    weeklyreport/YouMing.Huang-FW-Weekly-WK20.xlsx
+#       deleted:    weeklyreport/xianmei.liao FW-Weekly-WK 20.xlsx
+#       deleted:    xiangbin.feng
+#       modified:   xianmei
+#       deleted:    xueyi.chen
+#       deleted:    youming.huang
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#       IamUntrackFile
+
+1.rm  * -rf 						:delete the all files on the working space.
+2.git checkout -- ReadMe xianmei	:checkout the files ReadMe & xianmei into working space from staging space.  
+  touch IamUntrackFile				:create a new file into working space
+  echo 'hello' >> ReadMe
+  echo 'hello' >> xianmei			:add the 'hello' into the end of files,modify the files.
+3.git add ReadMe					:submmit the modify ReadMe into the staging space.
+4.git status						:show the status about working space compare with staging space,
+									 it show the ReadMe has been modify in the staging space.
+
+    
 
