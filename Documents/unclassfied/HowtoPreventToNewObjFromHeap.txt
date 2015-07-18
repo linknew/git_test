@@ -1,0 +1,167 @@
+载自 http://blog.sina.com.cn/s/blog_4c4d6e740100uo0l.html
+
+C++堆对象如何禁用和C++栈对象产生禁用方式
+
+C++堆对象产生方法注意就是通过使用new来进行操作。那么如果我们想要禁止产生C++堆对象又该如何进行操作呢？在这里将会给出正确的答案。
+
+C++中对于内存的相关知识是一个比较重要而且复杂的知识点，我们需要不断的深入的对其进行研究。今天在这里我们将会针对C++堆对象的一些应用方法做一个详细的介绍，应该可以帮助大家对此有一个深刻的认识。
+
+产生C++堆对象的方法是使用new操作，如果我们禁止使用new不就行了么。再进一步，new操作执行时会调用operator new，而operator new是可以重载的。方法有了，就是使new operator 为private，为了对称，最好将operator delete也重载为private。
+
+现在，你也许又有疑问了,难道创建栈对象不需要调用new吗？是的，不需要，因为创建栈对象不需要搜索内存，而是直接调整堆栈指针，将对象压栈，而 operator new的主要任务是搜索合适的堆内存，为C++堆对象分配空间，这在上面已经提到过了。好，让我们看看下面的示例代码：
+
+#include stdlib.h 需要用到C式内存分配函数
+class Resource ; 代表需要被封装的资源类
+class NoHashObject
+{
+    　private
+        Resource* ptr ;指向被封装的资源
+        ... ... 其它数据成员
+        void operator new(size_t size) 非严格实现，仅作示意之用
+        {
+            　return malloc(size) ;
+        }
+    void operator delete(void pp) 非严格实现，仅作示意之用
+    {
+        　free(pp) ;
+    }
+    　public
+        NoHashObject()
+        {
+            　此处可以获得需要封装的资源，并让ptr指针指向该资源
+                　ptr = new Resource() ;
+        }
+    ~NoHashObject()
+    {
+        　delete ptr ; 释放封装的资源
+    }
+};
+NoHashObject现在就是一个禁止C++堆对象的类了，如果你写下如下代码：
+
+NoHashObject* fp = new NoHashObject() ; 编译期错误！
+delete fp ;
+上面代码会产生编译期错误。好了，现在你已经知道了如何设计一个禁止堆对象的类了，你也许和我一样有这样的疑问，难道在类NoHashObject 的定义不能改变的情况下，就一定不能产生该类型的C++堆对象了吗？不，还是有办法的，我称之为“暴力破解法”。C++是如此地强大，强大到你可以用它做 你想做的任何事情。这里主要用到的是技巧是指针类型的强制转换。
+
+void main(void)
+{
+    char* temp = new char[sizeof(NoHashObject)] ;
+    强制类型转换，现在obj_ptr是一个指向NoHashObject对象的指针
+
+        NoHashObject* obj_ptr = (NoHashObject)temp ;
+               temp = NULL ;
+
+               防止通过temp指针修改NoHashObject对象再一次强制类型转换，让rp指针指向堆中NoHashObject对象的obj_ptr成员
+
+                   Resource* rp = (Resource)obj_ptr ;
+               初始化obj_ptr指向的NoHashObject对象的ptr成员
+
+                   rp = new Resource() ;
+               现在可以通过使用obj_ptr指针使用堆中的NoHashObject对象成员了
+
+                   ... ...
+                   delete rp ;释放资源
+                   temp = (char*)obj_ptr ;
+               obj_ptr = NULL ;防止悬挂指针产生
+                   delete [] temp ;释放NoHashObject对象所占的堆空间。
+}
+上面的实现是麻烦的，而且这种实现方式几乎不会在实践中使用，但是我还是写出来路，因为理解它，对于我们理解C++内存对象是有好处的。对于上面的这么多强制类型转换，其最根本的是什么了？我们可以这样理解：
+
+某块内存中的数据是不变的，而类型就是我们戴上的眼镜，当我们戴上一种眼镜后，我们就会用对应的类型来解释内存中的数据，这样不同的解释就得到了不同的信息。
+
+所谓强制类型转换实际上就是换上另一副眼镜后再来看同样的那块内存数据。
+
+另外要提醒的是，不同的编译器对对象的成员数据的布局安排可能是不一样的，比如，大多数编译器将NoHashObject的ptr指针成员安排在对象空间的头4个字节，这样才会保证下面这条语句的转换动作像我们预期的那样执行：
+
+Resource* rp = (Resource)obj_ptr ;
+但是，并不一定所有的编译器都是如此。既然我们可以禁止产生某种类型的C++堆对象，那么可以设计一个类，使之不能产生栈对象吗？当然可以。
+
+
+
+C++栈对象的创建过程中，会移动栈顶指针以腾出一个适当大小的控件方便我们直接调用对应的构造函数来完成栈对象的创造。那么我们要想限制C++栈对象的产生又该如何操作呢？
+
+我们在上一篇文章中为大家介绍了产生C++堆对象禁用的具体实现方式，相信大家应该有所掌握。今天我们将会为大家介绍同属于内存逻辑区域的C++栈对象的禁用方式。希望能让大家进一步对这方面的应用技巧有一个深刻的认识。
+
+创建C++栈对象时会移动栈顶指针以“挪出”适当大小的空间，然后在这个空间上直接调用对应的构造函数以形成一个栈对象，而当函数返回时，会调用其 析构函数释放这个对象，然后再调整栈顶指针收回那块栈内存。在这个过程中是不需要operat or new delete操作的，所以将operator new delete设置为private不能达到目的。当然从上面的叙述中，你也许已经想到了：将构造函数或析构函数设为私有的，这样系统就不能调用构造 析构函数了，当然就不能在栈中生成对象了。
+
+这样的确可以，而且我也打算采用这种方案。但是在此之前，有一点需要考虑清楚,那就是，如果我们将构造函数设置为私有，那么我们也就不能用new来 直接产生堆对象了，因为new在为对象分配空间后也会调用它的构造函数啊。所以，我打算只将析构函数设置为private。再进一步，将析构函数设为 private除了会限制栈对象生成外，还有其它影响吗？是的，这还会限制继承。
+
+如果一个类不打算作为基类，通常采用的方案就是将其析构函数声明为private。
+
+为了限制C++栈对象，却不限制继承，我们可以将析构函数声明为protected，这样就两全其美了。如下代码所示：
+
+1.  class NoStackObject
+
+2.  {
+
+    3.  protected
+
+        4.  ~NoStackObject() { }
+
+    5.  public
+
+        6.  void destroy()
+
+        7.  {
+
+            8.  delete this ;调用保护析构函数
+
+                9.  }
+
+    10.};
+
+接着，可以像这样使用NoStackObject类：
+
+1.  NoStackObject hash_ptr = new NoStackObject() ;
+
+2.  ... ... 对hash_ptr指向的对象进行操作
+
+3.  hash_ptr-destroy() ;
+
+是不是觉得有点怪怪的，我们用new创建一个对象，却不是用delete去删除它，而是要用destroy方法。很显然，用户是不习惯这种怪异的使 用方式的。所以，我决定将构造函数也设为private或protected。这又回到了上面曾试图避免的问题，即不用new，那么该用什么方式来生成一 个对象了？我们可以用间接的办法完成，即让这个类提供一个static成员函数专门用于产生该类型的堆对象。（设计模式中的singleton模式就可以 用这种方式实现。）让我们来看看：
+
+1.  class NoStackObject
+
+2.  {
+
+    3.  protected
+
+        4.  NoStackObject() { }
+
+    5.  ~NoStackObject() { }
+
+    6.  public
+
+        7.  static NoStackObject creatInstance()
+
+        8.  {
+
+            9.  return new NoStackObject() ;调用保护的构造函数
+
+                10.}
+
+    11.void destroy()
+
+        12.{
+
+            13.delete this ;调用保护的析构函数
+
+                14.}
+
+    15.};
+
+现在可以这样使用NoStackObject类了：
+
+
+1.  NoStackObject hash_ptr = NoStackObjectcreatInstance() ;
+
+2.  ... ... 对hash_ptr指向的对象进行操作
+
+3.  hash_ptr-destroy() ;
+
+4.  hash_ptr = NULL ; 防止使用悬挂指针
+
+以上就是对C++栈对象进行限制的相关操作方法。
+
+
+
+ 转载：http://developer.51cto.com/art/201002/182721.htm
