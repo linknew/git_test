@@ -210,6 +210,70 @@ void test5(void)
     return ;
 }
 
+namespace test6_space{
+    class excpt_a{
+        public:
+            void err_info(int line_num)
+            {
+                cout << "catch excpt_a at line: " << line_num << endl;
+                return ;
+            }
+        private:
+    } ;
+}
+
+//test6, about exception
+void test6(void)
+{
+    using namespace test6_space;
+    
+    // throw and catch
+    // continue to execute statement following by 'catch' if 
+    // catched successful
+    {
+        try{
+            throw excpt_a();
+            return ;
+        }catch(excpt_a &err){
+            err.err_info(__LINE__);
+        }
+
+        cout << __LINE__ << "  continue" << endl ;
+    }
+
+    // thow -> no catch
+    // return to caller directly if failing on catch
+    {
+        try{
+            try{
+                throw excpt_a() ;
+            }catch(int &err){
+            }
+            cout << __LINE__ << "  continue" << endl ;  // skip this
+        }catch(excpt_a &err){
+            err.err_info(__LINE__);
+        }
+        cout << __LINE__ << "  continue" << endl ;
+    }
+
+    // thow -> catched -> rethow
+    {
+        try{
+            try{
+                cout << "thow a excpt here" << endl ;
+                throw excpt_a() ;
+            }catch(excpt_a &err){
+                err.err_info(__LINE__);
+                cout << "rethow it again" << endl;
+                throw ;
+            }
+            cout << "this line will not be printed" << endl ;
+        }catch(excpt_a &err){
+            err.err_info(__LINE__);
+        }
+        cout << __LINE__ << "  continue" << endl ;
+    }
+}
 
 int main(void)
 {
@@ -217,7 +281,8 @@ int main(void)
     //test2();
     //test3() ;
     //test4();
-    test5();
+    //test5();
+    test6();
 
     return 0 ;
 }
