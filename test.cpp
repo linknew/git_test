@@ -135,10 +135,35 @@ void test3(void)
     return ;
 }
 
+//test4, about macro
+void test4(void)
+{
+    // a trap!!! for macro
+#define max(a,b)    (a) > (b) ? (a) : (b)
+
+    using std::cout;
+    using std::endl;
+    
+    int x=5;
+    int y=4;
+    int z=0;
+
+    z=max(x++,y) ;  // x++ will be executed twice once expand
+                    // template can fix this issue
+
+    cout << x << endl ;
+
+    return ;
+}
+
+
+
 int main(void)
 {
     //test1();
-    test2();
+    //test2();
+    //test3() ;
+    test4();
 
     return 0 ;
 }
