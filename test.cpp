@@ -156,6 +156,59 @@ void test4(void)
     return ;
 }
 
+namespace test5_1_space{
+    template<class T> T min(T,T) ;  // ok, declare a template
+    template<class U> U min(U,U) ;  // ok, same with upline
+
+    
+    template<class V>               // define the declared template
+    V min(V x, V y)
+    {
+        return x ;
+    }
+
+    template<class T1, class T2, class T3>
+    T1 func(T2 x, T3 y)
+    {
+        T1  ret = static_cast<T1>(0);
+        return ret ;
+    }
+}
+
+namespace test5_2_space{
+
+    template<class T>
+    inline void func(T t)   // if want use keyword "inline" or "extern",
+                            // the key words must be placed after 
+                            //  template arguments
+    {
+        int k = 0 ;
+        typename T::name i ; // use "typename" to indicate T::name is a TYPE
+    }
+}
+
+//test5, about template
+void test5(void)
+{
+    using namespace test5_1_space ;
+    using namespace test5_2_space ;
+
+    cout << min(3,4) << endl ;  //implicitly specify
+                                //use actual argument to 
+                                //dedue the template argument tpye
+                                //this is called 
+                                //"template argument deduction"
+
+    cout << min<int>(3,4) << endl ; // explicitly specify
+
+    cout << func<int,char,char>('a','b') << endl ; // explicitly specify
+                            // cannot deduce the return type automatically
+
+    cout << func<int>('a','b') << endl ;    // explicitly specify
+                            // only return type cannot be deduced
+                            // so, we can ellipsis the others.
+    return ;
+}
 
 
 int main(void)
@@ -163,7 +216,8 @@ int main(void)
     //test1();
     //test2();
     //test3() ;
-    test4();
+    //test4();
+    test5();
 
     return 0 ;
 }
