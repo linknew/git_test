@@ -120,6 +120,9 @@ void test3(void)
                             // c++ will expand the overload functions
                             // the function name will be renamed.
                             // but will not expand "C" style function name 
+                            // ATTENTION PLEASE, 
+                            // extern "C" cannot used in function inside.
+                            // here we just assume, it is not in a function.
     }
 
     // function pointer vs overload
@@ -223,7 +226,7 @@ namespace test6_space{
 }
 
 //test6, about exception
-void test6(void)
+void test6(void) throw(int,test6_space::excpt_a)
 {
     using namespace test6_space;
     
@@ -270,9 +273,145 @@ void test6(void)
             cout << "this line will not be printed" << endl ;
         }catch(excpt_a &err){
             err.err_info(__LINE__);
+            throw ;
         }
         cout << __LINE__ << "  continue" << endl ;
     }
+}
+
+namespace test7_1_space{
+    class a{
+        public:
+        a() {} ;                    // ok
+        //a() const ;               // fail. not allow const construction
+        //a(int=3,int=2,int=1){} ;  // fail. ambiguous with a()
+    } ;
+
+    class b{
+        public:
+            b(int i):_i(i),_j(i*2) {}  // use initial list to initialize members
+        private:
+            int _i ;
+            int _j ;
+    };
+
+    class c{
+        public:
+            c(int i):_i(i),_j(_i){}     // must use initial list to initial const or reference member
+                                        // because const or reference must be initialized when defined.
+        private:
+            const int  _i ;
+            const int& _j ;
+    };
+
+    class d{
+        public:
+            //d(int i):_k(i),_j(_k+1),_i(_j+1) {} // there 2 warnings!!!
+                                                // the order of initial list is not 
+                                                // the true order the member initialsed.
+                                                // normally, the initialize order is depend on the order of members
+            d(int i):_k(i),_j(i+2),_i(i+3) {}   // ok.
+                                                
+        private:
+            int _i ;
+            int _j ;
+            int _k ;
+    };
+}
+
+// test7, about construction function
+void test7(void)
+{
+    using namespace test7_1_space;
+
+    a oa;
+    //a ob(oa);
+    return ;
+}
+
+namespace test8_space{
+
+    class a ;                                       // declare a class
+
+    class A{
+        //int i = 1 ;                               // error, cannot initialed in class type. (no object)
+        const static int k = 3 ;                    // ok, (no need object)
+    };
+
+    // for describing inline function
+    class a{
+        public:
+            int func_1(void){ return 0; }           // ok, defined inside in a class, is a inline function
+            inline int func_2(void) {return 0; }    // ok, explicitly define a inline function
+            inline int func_3(void) ;               // declare a inline function.
+    };
+
+    int a::func_3(void)                             // define the inline function, the "inline" keyword is ellipsised
+    {
+        return 0 ;
+    }
+
+    // for friend
+    class b{
+        friend void func_friend(void) ;             // the tags public/protected/private will not effect friend declare.
+        public:
+        protected:
+        private:
+            void _func_prv(void){ cout << "hello, i am a private function in class b" << endl ;}
+    } ;
+
+    void func_friend(void)
+    {
+        b ob;
+        
+        cout << "i am func_friend, i will invoke class_b's private function" << endl;
+        ob._func_prv() ;
+        return ;
+    }
+
+    // for const object
+    class c{
+        public:
+            c(){;}
+            //c() const {;}                             // const construction is not allowed
+
+            void func(void) const                       // const function
+            { 
+                //_i = 3 ;                              // will change object data, is not allowed in const function
+                //*_p = 3 ;                             // it's ok as this operation does not change the object data.
+                                                        // the value of "_p" is not change.
+                                                        // there is BUG !!
+                                                        // if the construction like this:  c() : _p(&_i) {;}
+                                                        // then *_p = 3 will change the value of _i.
+                cout << __PRETTY_FUNCTION__ << endl  ;
+            }
+
+            void func(void)                             // non-const function
+            { 
+                cout << __PRETTY_FUNCTION__ << endl; 
+            }
+
+        private:
+            int _i ;
+            int* _p ;
+    };
+
+}
+
+// test8, about class
+void test8(void)
+{
+    using namespace test8_space ;
+
+    func_friend() ;
+
+    const c oc1;
+    c oc2 ;
+    oc1.func();             // invoke const function as the object is const one
+    oc2.func();             // invoke non-const function as the object is non-const one
+
+    //oc1.func
+    return ;
 }
 
 int main(void)
@@ -282,7 +421,9 @@ int main(void)
     //test3() ;
     //test4();
     //test5();
-    test6();
+    //test6();
+    //test7();
+    test8();
 
     return 0 ;
 }
