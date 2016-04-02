@@ -414,6 +414,51 @@ void test8(void)
     return ;
 }
 
+namespace test9_space{
+    class base{
+        public:
+            void func(int)
+            {
+                cout << __PRETTY_FUNCTION__ << endl ;
+            }
+            void func(int,int)
+            {
+                cout << __PRETTY_FUNCTION__ << endl ;
+            }
+    } ;
+
+    class derive : public base {
+        public:
+            void func(int, int)
+            {
+                cout << __PRETTY_FUNCTION__ << endl ;
+            }
+    } ;
+} 
+
+// virtual vs. inherit
+void test9(void)
+{
+    using namespace test9_space;
+
+    base b ;
+    derive d ;
+    base* pb = &b ;
+    base* pd = &d ;
+
+    b.func(1);
+    b.func(1,1);
+
+    //d.func(1) ;
+    d.func(1,1) ;
+
+    pb->func(1) ;
+    pb->func(1,1) ;
+
+    pd->func(1);
+    pd->func(1,1);
+}
+
 int main(void)
 {
     //test1();
@@ -423,7 +468,8 @@ int main(void)
     //test5();
     //test6();
     //test7();
-    test8();
+    //test8();
+    test9();
 
     return 0 ;
 }
