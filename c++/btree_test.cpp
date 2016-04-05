@@ -1,8 +1,8 @@
 #include <iomanip>
 #include <iostream>
-#include "btree_node.h"
-#include "btree_guide.h"
 #include "btree.h"
+#include "btree_node.h"
+#include "btree_explorer.h"
 
 using std::string ;
 
@@ -17,16 +17,18 @@ int main(void)
         bt.insert(new btree_node<int>(15)) ;
         bt.insert(new btree_node<int>(9)) ;
         bt.insert(new btree_node<int>(6)) ;
+        bt.insert(new btree_node<int>(32)) ;
+        bt.insert(new btree_node<int>(17)) ;
         
-        explorer<int> e ;
-        btree_guide<int> g ;
-        print_task<int> tp(bt.get_root());
+        btree_explorer<int> e ;
         searching_task<int> ts(bt.get_root(),btree_guide<int>::ORTT_SEARCH,12);
 
-        e.assign_guide(g);
         e.assign_task(ts);
-
         cout << e.cross_tree()->data << endl ;
+
+        print_task<int> tp(bt.get_root(),btree_guide<int>::ORTT_PREORDER);
+        e.assign_task(tp);
+        e.cross_tree() ;
 
 
     }catch(int &err){

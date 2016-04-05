@@ -459,6 +459,39 @@ void test9(void)
     pd->func(1,1);
 }
 
+namespace test10_space{
+    class b{
+        public:
+            int i ;
+    };
+
+    class d : public b{
+        public:
+            int i ;
+    };
+}
+
+// pointer of base class to refer derive class vs. member(not function member) override
+void test10(void)
+{
+    using namespace test10_space ;
+
+    b* pb ;
+    b ob ;
+    d od ;
+
+    od.b::i = 1 ;
+    od.i = 2;
+
+    pb = &od ;
+
+    cout << od.i << endl ;
+    cout << od.b::i << endl ;
+    cout << pb->i << endl ;
+
+    return ;
+}
+
 int main(void)
 {
     //test1();
@@ -469,7 +502,8 @@ int main(void)
     //test6();
     //test7();
     //test8();
-    test9();
+    //test9();
+    test10();
 
     return 0 ;
 }

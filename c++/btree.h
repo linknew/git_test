@@ -22,8 +22,9 @@ using std::cerr ;
 using std::endl ;
 using std::setw ;
 
+template<class T> class btree_node ;
 template<class T> class btree_guide ;
-template<class T> class btree ;
+template<class T> class btree_explorer ;
 
 template<class T>
 class print_task : public task<T>{
@@ -291,12 +292,10 @@ inline btree_node<T>* btree<T>::get_parent(const btree_node<T> *t)
 template<class T>
 btree<T>::~btree()
 {
-    explorer<T> e ;
-    btree_guide<T> g ;
+    btree_explorer<T> e ;
     destruction_task<T> t(_proot);
 
     cerr << "destruction btree:" << this << endl;
-    e.assign_guide(g) ;
     e.assign_task(t) ;
     e.cross_tree() ;
 
@@ -432,11 +431,9 @@ void btree<T>::insert(btree_node<T>* cur)
     if(!cur)
         return ;
 
-    explorer<T> e ;
-    btree_guide<T>  g ;
+    btree_explorer<T> e ;
     searching_task<T> t(_proot,btree_guide<T>::ORTT_SEARCH,cur->data) ;
 
-    e.assign_guide(g) ;
     e.assign_task(t) ;
     p = e.cross_tree() ;
 

@@ -8,6 +8,10 @@
 using std::cout ;
 using std::endl ;
 
+template<class T> class btree_node ;
+template<class T> class btree_explorer ;
+template<class T> class btree ;
+
 template<class T>
 class btree_guide : public guide<T>{
 

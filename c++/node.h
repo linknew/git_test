@@ -91,9 +91,19 @@ class explorer{
 
     public:
         explorer() : _guide(0),_task(0),_last_step(0)
-        { cerr << "construction explorer:" << this << endl;}
+        { 
+            cerr << "construction explorer:" << this << endl;
+        }
+
+        explorer(guide<T>& g) : _guide(&g),_task(0),_last_step(0)
+        { 
+            cerr << "construction explorer:" << this << endl;
+        }
+
         virtual ~explorer()
-        { cerr << "destruction explorer:" << this << endl;}
+        { 
+            cerr << "destruction explorer:" << this << endl;
+        }
     
         inline void assign_guide(guide<T>& g){ _guide = &g; }
         inline void assign_task(task<T>& t){ _task = &t; _last_step = NULL; }

@@ -7,10 +7,14 @@
 using std::cout;
 using std::endl;
 
+template<class T> class btree_guide ;
+template<class T> class btree_explorer ;
+template<class T> class btree ;
+
 template<class T>
 struct btree_node : public node<T>{
 
-    btree_node(T d) : node<T>::node(d),pleft(NULL),pright(NULL),pparent(NULL){} 
+    btree_node(T d) : node<T>(d),pleft(NULL),pright(NULL),pparent(NULL){} 
     bool operator< (const node<T>&) ;
     bool operator> (const node<T>&) ;
     bool operator<=(const node<T>&) ;
