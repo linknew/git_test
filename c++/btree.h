@@ -1,17 +1,9 @@
-#ifndef ERR_INV_ARG
-#define ERR_INV_ARG (-1)
-#endif
-
-#ifndef ERR_ADOPTION_FAIL
-#define ERR_ADOPTION_FAIL   (-2)
-#endif
-
-#ifndef UNKNOWN_TRAVERSAL_CMD
-#define UNKNOWN_TRAVERSAL_CMD (-3)
-#endif
-
 #ifndef __btree_h__
 #define __btree_h__
+
+#define ERR_INV_ARG (-1)
+#define ERR_ADOPTION_FAIL   (-2)
+#define UNKNOWN_TRAVERSAL_CMD (-3)
 
 #include <iostream>
 #include "btree_node.h"
