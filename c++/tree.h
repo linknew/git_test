@@ -1,24 +1,47 @@
-#ifndef __NODE_H__
-#define __NODE_H__
+#ifndef __TREE_H_
+#define __TREE_H_
 
 #include <iostream>
 
-using std::cout;
+#define _DBG 0
+
+#if _DBG
+#define throw_err(err_no)                                   \
+{                                                           \
+    cerr << "**ALERT" << endl                               \
+         << "[" << __FILE__ << ":" << __LINE__  << "] "     \
+         << "throw an error (" << err_no << ")"             \
+         << endl ;                                          \
+    throw err_no ;                                          \
+}
+#else
+#define throw_err(err_no)                                   \
+{                                                           \
+    throw err_no ;                                          \
+}
+#endif
+
+
+
+
+
 using std::endl;
 using std::cerr;
 
-template<class T> class explorer ;
-
-void throw_err(const char* file,int line,int err_no=-1)
-{
-    cout << "ATTENTION!!: " << file << "," << line << endl ;
-    throw err_no ;
-}
-
 template<class T>
 struct node{
-    node(T value) : data(value) {cerr << "construction node:" << this << endl ;}
-    virtual ~node(){ cerr << "destruction node:" << data << endl ;}
+    node(T value) : data(value) 
+    {
+#if _DBG
+        cerr << "construction node:" << this << endl ;
+#endif
+    }
+    virtual ~node()
+    { 
+#if _DBG
+        cerr << "destruction node:" << data << endl ;
+#endif
+    }
 
     virtual bool operator < (const node&) = 0 ;
     virtual bool operator > (const node&) = 0 ;
@@ -29,16 +52,31 @@ struct node{
     T  data;
 };
 
+template<class T> class explorer ;
+
 template<class T>
 class guide{
     friend class explorer<T> ;
 
     public:
         guide() : _ort_type(0) 
-        { cerr << "construction guide:" << this << endl;}
-        guide(int ott) : _ort_type(ott) { cerr << "construction guide:" << this << endl;}
+        { 
+#if _DBG
+            cerr << "construction guide:" << this << endl;
+#endif
+        }
+        guide(int ott) : _ort_type(ott) 
+        { 
+#if _DBG
+            cerr << "construction guide:" << this << endl;
+#endif
+        }
         virtual ~guide()
-        { cerr << "destruction guide:" << this << endl ;}
+        { 
+#if _DBG
+            cerr << "destruction guide:" << this << endl ;
+#endif
+        }
 
         virtual node<T>* get_start(const node<T>* ptree_top) const = 0;
         virtual node<T>* get_end(const node<T>* ptree_top) const = 0;
@@ -58,10 +96,19 @@ class task{
     public:
         task(node<T>* tree, int ort, const T& kw)
             :_state(TTS_NOT_START),_tree(tree),_ort(ort),_keyword(kw)
-        { cerr << "construction task:" << this << endl;}
+        { 
+#if _DBG
+            cerr << "construction task:" << this << endl;
+#endif
+        }
         virtual ~task()
-        { cerr << "destruction task:" << this << endl;}
+        { 
+#if _DBG
+            cerr << "destruction task:" << this << endl;
+#endif
+        }
 
+        // the state fo tree-task
         enum state{
             TTS_NO_TASK = -1,
             TTS_NOT_START,
@@ -92,17 +139,23 @@ class explorer{
     public:
         explorer() : _guide(0),_task(0),_last_step(0)
         { 
+#if _DBG
             cerr << "construction explorer:" << this << endl;
+#endif
         }
 
         explorer(guide<T>& g) : _guide(&g),_task(0),_last_step(0)
         { 
+#if _DBG
             cerr << "construction explorer:" << this << endl;
+#endif
         }
 
         virtual ~explorer()
         { 
+#if _DBG
             cerr << "destruction explorer:" << this << endl;
+#endif
         }
     
         inline void assign_guide(guide<T>& g){ _guide = &g; }
