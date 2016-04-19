@@ -21,15 +21,14 @@ int main(void)
         bt.insert(new btree_node<int>(17)) ;
         
         btree_explorer<int> e ;
-        searching_task<int> ts(bt.get_root(),btree_guide<int>::ORTT_SEARCH,12);
+        task_searching<int> ts(bt.get_root(),btree_guide<int>::ORTT_SEARCH,12);
 
         e.assign_task(ts);
         cout << e.cross_tree()->data << endl ;
 
-        print_task<int> tp(bt.get_root(),btree_guide<int>::ORTT_PREORDER);
+        task_print<int> tp(bt.get_root(),btree_guide<int>::ORTT_PREORDER);
         e.assign_task(tp);
         e.cross_tree() ;
-
 
     }catch(int &err){
         cout << err << endl ;

@@ -2,7 +2,7 @@
 #define __BTREE_NODE_H__
 
 #include <iostream>
-#include "node.h"
+#include "tree.h"
 
 using std::cout;
 using std::endl;

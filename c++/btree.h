@@ -19,9 +19,9 @@ template<class T> class btree_guide ;
 template<class T> class btree_explorer ;
 
 template<class T>
-class print_task : public task<T>{
+class task_print : public task<T>{
     public:
-        print_task(node<T>* tree,
+        task_print(node<T>* tree,
                    int ort = btree_guide<T>::ORTT_INORDER,
                    const T& kw = T(0)) 
             : task<T>(tree,ort,kw){}
@@ -46,15 +46,15 @@ class print_task : public task<T>{
                         : cout << "R(   *) " ;
 
             cout << endl ;
-            this->_state = task<T>::TTS_OK ;
-            return this->_state ;
+            this->task<T>::_state = task<T>::TTS_OK ;
+            return this->task<T>::_state ;
         }
 } ;
 
 template<class T>
-class searching_task : public task<T>{
+class task_searching : public task<T>{
     public:
-        searching_task(node<T>* tree,
+        task_searching(node<T>* tree,
                    int ort = btree_guide<T>::ORTT_SEARCH,
                    const T& kw = T(0)) 
             : task<T>(tree,ort,kw){}
@@ -62,15 +62,15 @@ class searching_task : public task<T>{
         int do_the_job(node<T>* node)
         {
             /* do nothing~~~ only travel~~ happy */
-            this->_state = task<T>::TTS_OK ;
-            return this->_state ;
+            this->task<T>::_state = task<T>::TTS_OK ;
+            return this->task<T>::_state ;
         }
 } ;
 
 template<class T>
-class destruction_task : public task<T>{
+class task_destruction : public task<T>{
     public:
-        destruction_task(node<T>* tree,
+        task_destruction(node<T>* tree,
                          int ort = btree_guide<T>::ORTT_POSTORDER,
                          const T &kw = T(0))
             : task<T>(tree,ort,kw){}
@@ -84,7 +84,7 @@ class destruction_task : public task<T>{
             }
 
             if(btree<T>::has_child(t))
-                throw_err(__FILE__,__LINE__) ;
+                throw_err(-1) ;
 
             if(btree<T>::has_parent(t))
                 btree<T>::is_left_child(t) ? btree<T>::get_parent(t)->pleft = NULL
@@ -93,8 +93,8 @@ class destruction_task : public task<T>{
             t->pparent = NULL ;
 
             delete t ;
-            this->_state = task<T>::TTS_OK ;
-            return this->_state ;
+            this->task<T>::_state = task<T>::TTS_OK ;
+            return this->task<T>::_state ;
         }
 } ;
 
@@ -105,7 +105,9 @@ class btree{
 
         btree(): _proot(NULL)
         { 
-             cerr << "construction btree:" << this << endl;
+#if _DBG
+            cerr << "construction btree:" << this << endl;
+#endif
         }
         virtual ~btree() ;
 
@@ -260,7 +262,7 @@ template<class T>
 inline btree_node<T>* btree<T>::get_left_brother(const btree_node<T> *t)
 {
     if(is_left_child(t))
-        throw_err(__FILE__,__LINE__) ;
+        throw_err(-1) ;
 
     return (has_parent(t) ? get_left_child(get_parent(t)) : NULL) ;
 }
@@ -269,7 +271,7 @@ template<class T>
 inline btree_node<T>* btree<T>::get_right_brother(const btree_node<T> *t)
 {
     if(is_right_child(t))
-        throw_err(__FILE__,__LINE__) ;
+        throw_err(-1) ;
 
     return (has_parent(t) ? get_right_child(get_parent(t)) : NULL) ;
 }
@@ -285,9 +287,11 @@ template<class T>
 btree<T>::~btree()
 {
     btree_explorer<T> e ;
-    destruction_task<T> t(_proot);
+    task_destruction<T> t(_proot);
 
+#if _DBG
     cerr << "destruction btree:" << this << endl;
+#endif
     e.assign_task(t) ;
     e.cross_tree() ;
 
@@ -298,10 +302,10 @@ template<class T>
 void btree<T>::adopt_child( btree_node<T> *parent, btree_node<T> *child, childid id)
 {
     if(!child || (id != ASLEFT && id != ASRIGHT && id != IAMROOT))
-        throw_err(__FILE__,__LINE__,ERR_INV_ARG) ;
+        throw_err(ERR_INV_ARG) ;
 
     if(has_parent(child))
-        throw_err(__FILE__,__LINE__,ERR_ADOPTION_FAIL) ;
+        throw_err(ERR_ADOPTION_FAIL) ;
 
     /* is first btree_node<T>, set as root */
     if(!_proot && !parent && IAMROOT == id){
@@ -317,7 +321,7 @@ void btree<T>::adopt_child( btree_node<T> *parent, btree_node<T> *child, childid
     else if(ASRIGHT == id && !has_right_child(parent))
         parent->pright = child ;
     else
-        throw_err(__FILE__,__LINE__,ERR_ADOPTION_FAIL) ;
+        throw_err(ERR_ADOPTION_FAIL) ;
 
     child->pparent = parent ;
 
@@ -328,7 +332,7 @@ template<class T>
 typename btree<T>::childid btree<T>::get_childid(const btree_node<T> *t)
 {
     if(!t)
-        throw_err(__FILE__,__LINE__) ;
+        throw_err(-1) ;
 
     if(!has_parent(t)) 
         return IAMROOT ;
@@ -368,7 +372,7 @@ btree_node<T>* btree<T>::lost_child(btree_node<T> *parent, childid id)
         parent->pright = NULL ;
         break ;
     default:
-        throw_err(__FILE__,__LINE__) ;
+        throw_err(-1) ;
         break ;
     }
 
@@ -424,7 +428,7 @@ void btree<T>::insert(btree_node<T>* cur)
         return ;
 
     btree_explorer<T> e ;
-    searching_task<T> t(_proot,btree_guide<T>::ORTT_SEARCH,cur->data) ;
+    task_searching<T> t(_proot,btree_guide<T>::ORTT_SEARCH,cur->data) ;
 
     e.assign_task(t) ;
     p = e.cross_tree() ;

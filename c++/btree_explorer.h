@@ -1,7 +1,7 @@
 #ifndef __BTREE_EXPLORER_H__
 #define __BTREE_EXPLORER_H__
 
-#include "node.h"
+#include "tree.h"
 #include "btree_guide.h"
 
 template<class T> class btree_node ;
