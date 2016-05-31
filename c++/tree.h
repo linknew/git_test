@@ -3,7 +3,9 @@
 
 #include <iostream>
 
+#ifndef _DBG
 #define _DBG 0
+#endif
 
 #if _DBG
 #define throw_err(err_no)                                   \
@@ -185,11 +187,10 @@ class explorer{
             end = _guide->get_next(end) ;  // refine the 'end'
 
             /* in this loop, we will repeat the 'job' to complete the task
-               before we do the job,
-               should get the next step first.
+               we should get the next step first before starting the 'job'
                Because...
-               the job may remove the cur node(during destruction) or sth. else,
-               and the 'get_next' depends on current node */
+               the 'job' may remove cur node(or something else),
+               and 'get_next' depends on current node */
             while(cur && (cur != end)){
                 _last_step = cur ;  // record it!!
                 working_node = cur ;

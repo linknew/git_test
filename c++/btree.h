@@ -24,7 +24,10 @@ class task_print : public task<T>{
         task_print(node<T>* tree,
                    int ort = btree_guide<T>::ORTT_INORDER,
                    const T& kw = T(0)) 
-            : task<T>(tree,ort,kw){}
+            : task<T>(tree,ort,kw)
+        {
+            ;
+        }
 
         int do_the_job(node<T>* node)
         {
@@ -57,7 +60,10 @@ class task_searching : public task<T>{
         task_searching(node<T>* tree,
                    int ort = btree_guide<T>::ORTT_SEARCH,
                    const T& kw = T(0)) 
-            : task<T>(tree,ort,kw){}
+            : task<T>(tree,ort,kw)
+        {
+            ;
+        }
 
         int do_the_job(node<T>* node)
         {
@@ -73,7 +79,10 @@ class task_destruction : public task<T>{
         task_destruction(node<T>* tree,
                          int ort = btree_guide<T>::ORTT_POSTORDER,
                          const T &kw = T(0))
-            : task<T>(tree,ort,kw){}
+            : task<T>(tree,ort,kw)
+        {
+            ;
+        }
 
         int do_the_job(node<T>* node)
         {
@@ -301,16 +310,17 @@ btree<T>::~btree()
 template<class T>
 void btree<T>::adopt_child( btree_node<T> *parent, btree_node<T> *child, childid id)
 {
-    if(!child || (id != ASLEFT && id != ASRIGHT && id != IAMROOT))
+    if(!child)
+        return ;
+
+    if(id != ASLEFT && id != ASRIGHT && id != IAMROOT)
         throw_err(ERR_INV_ARG) ;
 
     if(has_parent(child))
         throw_err(ERR_ADOPTION_FAIL) ;
 
-    /* is first btree_node<T>, set as root */
-    if(!_proot && !parent && IAMROOT == id){
-        child->pleft = NULL ;
-        child->pright = NULL ;
+    /* set as root */
+    if(!parent && IAMROOT == id){
         child->pparent = NULL ;
         _proot = child ;
         return ;
@@ -385,34 +395,35 @@ btree_node<T>* btree<T>::lost_child(btree_node<T> *parent, childid id)
 template<class T>
 void btree<T>::remove(btree_node<T> *cur)
 {
-    btree_node<T> *wanderer = NULL ;
+    //btree_node<T> *wanderer = NULL ;
+    btree_node<T>* pa = NULL ;
+    btree_node<T>* ch = NULL ;
+    childid id = ASLEFT ;
 
     if (!cur)
         return ;
 
-    // cur btree_node<T> has no child
-    if(!has_child(cur)){
-        if(NULL == leave_parent(cur))   // no parent
-            _proot = NULL ;
-        delete cur ;
-        return ;
-    }
-
     // merge children into one branch
     if (has_left_child(cur) && has_right_child(cur)){
-        wanderer = lost_child(cur,ASRIGHT) ;
-        adopt_child(get_rightmost(get_left_child(cur)),wanderer,ASRIGHT) ;
+        ch = lost_child(cur,ASRIGHT) ;
+        adopt_child(get_rightmost(get_left_child(cur)), ch, ASRIGHT) ;
     }
 
-    // now, there is only one branch. release cur btree_node<T> from tree
-    wanderer = lost_child(cur, has_left_child(cur) ? ASLEFT : ASRIGHT) ;
+    // now, there is only one branch.
 
-    if(has_parent(cur))
-        adopt_child(get_parent(cur), wanderer, get_childid(cur)) ;
-    else
-        _proot = wanderer ;
+    // cut off the 'cur' node from chain
+    id = get_childid(cur) ;
+    pa = leave_parent(cur) ;
+    ch = lost_child(cur, has_left_child(cur) ? ASLEFT : ASRIGHT) ;
 
-    // all done, delete cur
+    // re-chain
+    adopt_child(pa,ch,id) ;
+
+    // don't forget update _proot
+    if(!pa)
+        _proot = ch ;
+
+    // all done, delete the 'cur'
     delete cur ;
 
     return ;

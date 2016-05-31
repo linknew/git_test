@@ -17,6 +17,15 @@ class btree_explorer : public explorer<T>{
 
         ~btree_explorer(){ delete this->_guide; }
     
+        inline btree_node<T>* get_last_step(void)
+        {
+            return static_cast<btree_node<T>*>(explorer<T>::get_last_step()) ;
+        }
+
+        inline btree_node<T>* cross_tree(void)
+        {
+            return static_cast<btree_node<T>*>(explorer<T>::cross_tree()) ;
+        }
     protected:
 } ;
 
