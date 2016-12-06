@@ -1,0 +1,24 @@
+#! /bin/bash
+
+# use regexp in statement
+awk '{ if ($0 ~ /regexp/) print $0 }' t
+awk '{ if ($0 !~ /regexp/) print $0 }' t
+
+# regexp in stat
+#awk '$1 ~ /regexp/ { print $0 }' t
+#awk '$1 !~ /regexp/ { print $0 }' t
+
+# get the arguments from command line
+#awk '
+#BEGIN { print ARGC ARGV[0] ARGV[1] ARGV[2] ARGV[3] }
+#' val1="hi" val2="ho" t
+
+# 2 ways to cat 3 files: f1, f2, f3 
+#awk '{print $0}' f1 f2 f3
+#(`-' means read from standard input)
+#cat f2 | awk '{print $0}' f1 - f3
+
+# set different value for each file.
+#awk 'pass == 1 { print $0 "<--" pass}
+#	 pass == 2 { print $0 "<--" pass}' FS=':' pass=1 t pass=2 t
+
