@@ -1,10 +1,10 @@
 #! /bin/bash
 
 # use regexp in statement
-awk '{ if ($0 ~ /regexp/) print $0 }' t
-awk '{ if ($0 !~ /regexp/) print $0 }' t
+#awk '{ if ($0 ~ /regexp/) print $0 }' t
+#awk '{ if ($0 !~ /regexp/) print $0 }' t
 
-# regexp in stat
+# regexp
 #awk '$1 ~ /regexp/ { print $0 }' t
 #awk '$1 !~ /regexp/ { print $0 }' t
 
@@ -22,3 +22,30 @@ awk '{ if ($0 !~ /regexp/) print $0 }' t
 #awk 'pass == 1 { print $0 "<--" pass}
 #	 pass == 2 { print $0 "<--" pass}' FS=':' pass=1 t pass=2 t
 
+# ignore case
+#awk 'BEGIN{IGNORECASE=1}{ if (x ~ /ab/) print "ok"}' x="AB" t
+
+# set RS
+#echo record 1 AAA record 2 BBBBB record 3 |
+#awk 'BEGIN  { RS = "\n|( *[[:upper:]]+ *)" }
+#		    { print "Record =", $0, "and RT = [" RT "]" }'
+
+# change content of field
+#echo a b c d | awk '{ OFS=":"; $2=""
+#                      print $0; print NF }'
+
+# add new filed'S'
+#echo a b c d | awk '{ OFS=":"; $2=""; $6="this is new"
+#                      print $0; print NF }'
+
+# decrease the NF
+echo a b c d | awk '{ NF -= 1; $1 = $1; print $0 }'
+
+# when changging the record(not by changging the content of a filed, such as
+# increase/decrease the number of fileds) may not refresh the $0, we can use
+# $1=$1 to force the refreshing occurs
+
+# FS = " "
+# FS = "[ \t\n]+"
+# the 2 above is different.
+# FS = " ", will strips the whitespace from head and tail of a record first.
