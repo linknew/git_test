@@ -46,3 +46,29 @@ color_1=$'\e[4;41;33m'
 #	esac
 #done
 
+#checking if any branch hasn't pushed to remote
+#
+#_branches=`git branch | sed 's/\** *//g'`
+#
+#_errlog="err.log"
+#_done='\033[0;40;32m[done]\033[0m'
+#_fail='\033[0;40;31m[fail]\033[0m'
+#
+#for i in $_branches; do
+#	cmd="git diff $i origin/$i"
+# 	{ 	
+#		rm -f $i.diff 
+#		$cmd > $i.diff &&
+#		echo -e "$_done $i" || ( 
+#		echo -e "$_fail $i --> $_errlog" && echo -e "* $cmd" >&2 )
+#		} 2>>$_errlog
+#done
+#
+#for i in $_branches; do
+#	if [[ -s $i.diff ]] ; then
+#		if [[ _first -eq 0 ]] ; then
+#			_first=1 && echo -e "\nFollowing branches has not pushed to remote"
+#		fi
+#		echo "* $i"
+#	fi
+#done
