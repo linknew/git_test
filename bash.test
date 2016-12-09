@@ -1,0 +1,48 @@
+#! /bin/bash
+
+color_0=$'\e[0m'
+color_1=$'\e[4;41;33m'
+
+
+#function
+#function hi()
+#{
+#echo $#,$0,$1
+#echo ${FUNCNAME[*]}
+#}
+#echo $#,$0,$1
+#hi a b
+
+#select
+#select name in QUIT *; do 
+#	echo "you select ($REPLY)"
+#	if [ $REPLY -eq 1 ]; then
+#		echo bye bye
+#		break
+#	fi
+#	echo $color_1"ls $name"$color_0
+#	ls $name
+#done
+
+#read
+#read x y <<< 1\ 2
+#echo '$x='$x,'$y='$y
+
+#set
+#set a b c d e
+#echo "$# $*"
+
+#case
+#cat <<< "'q' to quit"
+#while read i
+#do
+#	case $i in
+#	*) echo "you have input $color_1'$i'$color_0, go on" ;;&	# use ;;&
+#	a) echo 'here is a, stop' ;;								# use ;;
+#	b) echo 'here is b, have a rest and go on' ;&				# use ;&
+#	c) echo 'here is c, stop' ;;
+#	d) echo 'here is d, stop' ;;
+#	q) echo 'here is q, bye.bye' ; break ;;
+#	esac
+#done
+
