@@ -20,7 +20,7 @@
 
 # set different value for each file.
 #awk 'pass == 1 { print $0 "<--" pass}
-#	 pass == 2 { print $0 "<--" pass}' FS=':' pass=1 t pass=2 t
+#     pass == 2 { print $0 "<--" pass}' FS=':' pass=1 t pass=2 t
 
 # ignore case
 #awk 'BEGIN{IGNORECASE=1}{ if (x ~ /ab/) print "ok"}' x="AB" t
@@ -28,7 +28,7 @@
 # set RS
 #echo record 1 AAA record 2 BBBBB record 3 |
 #awk 'BEGIN  { RS = "\n|( *[[:upper:]]+ *)" }
-#		    { print "Record =", $0, "and RT = [" RT "]" }'
+#            { print "Record =", $0, "and RT = [" RT "]" }'
 
 # change content of field
 #echo a b c d | awk '{ OFS=":"; $2=""
@@ -39,7 +39,7 @@
 #                      print $0; print NF }'
 
 # decrease the NF
-echo a b c d | awk '{ NF -= 1; $1 = $1; print $0 }'
+#echo a b c d | awk '{ NF -= 1; $1 = $1; print $0 }'
 
 # when changging the record(not by changging the content of a filed, such as
 # increase/decrease the number of fileds) may not refresh the $0, we can use
@@ -49,3 +49,137 @@ echo a b c d | awk '{ NF -= 1; $1 = $1; print $0 }'
 # FS = "[ \t\n]+"
 # the 2 above is different.
 # FS = " ", will strips the whitespace from head and tail of a record first.
+
+#redirection
+
+#use pipe
+#awk '
+#{
+#    "ls" | getline; print $0
+#    print "ls -al" | "sh"
+#    close("sh")
+#}
+#
+#END {
+#    close("ls")
+#}'
+
+
+#array
+#awk '
+#BEGIN {
+#    if(isarray(array)){
+#        delete array[""]                     # delete a element
+#        delete array                         # delete whole array
+#    }
+#    #array = 3                               # ERROR, cannot change the type
+#    hello = 100
+#    array[hello] = "1. subscript_is_100"
+#    array[15]     = "2. subscript_is_15_1"
+#    array["15"]  = "3. subscript_is_15_2"    # override array[15]
+#    array[hi]    = "4. empty_subscript_1"    # subscript is not '0' but ''
+#    array[ho]    = "5. empty_subscript_2"    # override array[hi]
+#}
+#
+#END {
+#    for (i in array){
+#        print array[i]
+#    }
+#}' -
+
+#multidimension array
+#awk '
+#BEGIN {
+#    for (i=0; i<3; i++)
+#        for (j=0; j<3; j++)
+#            array[i,j] = k++ ;
+#}
+#END {
+#    for (i=0; i<3; i++)
+#        for (j=0; j<3; j++)
+#            print array[i,j]
+#
+#    for (l in array)
+#        print array[l]
+#}'
+
+#functions for string manipulation
+#1) asort & asorti
+#   asort (source [, dest [, how ] ])
+#   asorti(source [, dest [, how ] ])
+#awk '
+#BEGIN {
+#    a["hi"] = "b-dadada"
+#    a["ho"] = "c-dadada"
+#    a["he"] = "a-dadada"
+#}
+#
+#END {
+#    asort(a,b)
+#    for (i in b)
+#        print i,b[i]    # NOTE, the subscripts has been replaced by 1,2,3...
+#}
+#'
+
+#2) gensub (regexp, replacement, how [, target])
+#   gsub   (regexp, replacement [, target])
+#   gensub return the modified string. support \N (\1,\2,\3,...\9)
+#   gsub return the number of subtitution made, does not support \N
+#awk '
+#BEGIN {
+#    a = "abc def"
+#    b = gensub(/(.+) (.+)/, "\\2 \\1", "g", a)
+#    print a,"->",b
+#
+#    c = gsub(/(.+) (.+)/, "\\2 \\1", a)   #does not support \N
+#    print a,",",c
+#}
+#'
+
+#3) sub( regexp, replacement [, target] )
+#   replace the first matched.
+#   return 1 when successful, otherwise return 0.
+#echo aBaBaB | awk '
+#{
+#    while (sub( /a/, "A" ))
+#        print
+#}'
+
+#4) index (in, find)
+#   search `find' in `in', return the index (start from 1).
+#   return 0 if nothing found
+
+#5) match(string, regexp [, array])
+#   search string for longest, leftmost substring matched by the regexp
+#   if matching, return the matching index
+#       if array(2 dimensions) is present, clear it, then:
+#           set array[0] with the matched string.
+#           set array[0,start] with the matched index.
+#           set array[0,length] with the matched length
+#           set array[N] with the matched \N string.
+#           set array[N,start] with the matched \N index.
+#           set array[N,length] with the matched \N length
+#   otherwise, return 0
+#echo foooobazbarrrr | awk '
+#{
+#    match( $0, /(fo+).+(bar*)/, arr )
+#    print arr[1], arr[2]
+#    print arr[1, "start"], arr[1, "length"]
+#    print arr[2, "start"], arr[2, "length"]
+#}'
+    
+#6) length([string])
+
+#7) substr( string, start [, length] )
+#awk '{print substr( $0, 7, 3 )}'    # has not change $0
+
+#8) toupper( string )
+#9) tolower( string )
+#10)system( command )
+#11)close( filename [, how] )
+#awk '{
+#    while( ... )
+#        print command | "/bin/sh"
+#    close("/bin/sh")
+    
+#12)...
