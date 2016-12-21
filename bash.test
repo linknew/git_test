@@ -72,3 +72,11 @@ color_1=$'\e[4;41;33m'
 #		echo "* $i"
 #	fi
 #done
+
+#test, -v varname returns TRUE if varname is set
+#set tmp
+unset tmp
+[[ -v tmp ]] && echo 'variable ``tmp" is set'
+[[ $tmp == "" ]] && echo 'variable ``tmp" is empty'		# not safe
+tmp="hi, i have been set a value"
+echo ${tmp:?"tmp is unset or null"}
