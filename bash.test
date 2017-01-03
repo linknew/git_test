@@ -9,9 +9,42 @@ color_1=$'\e[4;41;33m'
 #{
 #echo $#,$0,$1
 #echo ${FUNCNAME[*]}
+#return 0   #return -1  `-1' will be regard as an option of cmd `return'
 #}
 #echo $#,$0,$1
 #hi a b
+#============================================================================
+
+#declare
+#declare variables and/or give them attributes. 
+#usages:
+#   1)declare [-aAfFgilrtux] 
+#   2)declare -p [variable ...]
+#   3)declare [-+aAfFgilrtux] [name[=value] ...]
+#usage_1, list definitions(variables or funcitons) which matched the attrs
+#         if no arguments represents, all definitions will be listed.
+#usage_2, display the attributes of each variable
+#usage_3, set/unset attributes for each name(variables or functions)
+#options:
+#   -p      will dispaly the attributes and values of each name
+#   -a      array
+#   -A      associative array
+#   -f      function
+#   -F      function name only
+#   -i      integer
+#   -l      to lower-case, once assigned a value, set all to lower-case
+#   -u      to upper-case
+#   -r      readonly, cannot be unset or assigned
+#   -x      export to subsequent commands
+#   -g      global?
+#   -t      set trace attribute. (DEBUG/RETURN/... traps) 
+#declare -a      #list all array
+#declare -A      #list all associative array
+#declare -F      #list all functions, only attribute and name displayed.
+#declare -f fun_1 fun_2      #add `function' attribute to fun_1 and fun_2
+#i=1; j=2; declare -p i j    #display the attributes of variable: i and j
+#declare -ir +x va=3 #set va to `integer'&`readonly' and remove `export' attr
+#============================================================================
 
 #select
 #select name in QUIT *; do 
@@ -23,14 +56,19 @@ color_1=$'\e[4;41;33m'
 #	echo $color_1"ls $name"$color_0
 #	ls $name
 #done
+#============================================================================
 
 #read
 #read x y <<< 1\ 2
 #echo '$x='$x,'$y='$y
+#============================================================================
 
 #set
-#set a b c d e
+#set a b c d e  #set arguments ($0,$1,...)
 #echo "$# $*"
+#set -x         #open debug
+#set +x         #close debug
+#============================================================================
 
 #case
 #cat <<< "'q' to quit"
@@ -45,6 +83,7 @@ color_1=$'\e[4;41;33m'
 #	q) echo 'here is q, bye.bye' ; break ;;
 #	esac
 #done
+#============================================================================
 
 #checking if any branch hasn't pushed to remote
 #
@@ -72,11 +111,162 @@ color_1=$'\e[4;41;33m'
 #		echo "* $i"
 #	fi
 #done
+#============================================================================
 
 #test, -v varname returns TRUE if varname is set
 #set tmp
-unset tmp
-[[ -v tmp ]] && echo 'variable ``tmp" is set'
-[[ $tmp == "" ]] && echo 'variable ``tmp" is empty'		# not safe
-tmp="hi, i have been set a value"
-echo ${tmp:?"tmp is unset or null"}
+#unset tmp
+#[[ -v tmp ]] && echo 'variable ``tmp" is set'
+#[[ $tmp == "" ]] && echo 'variable ``tmp" is empty'		# not safe
+#tmp="hi, i have been set a value"
+#echo ${tmp:?"tmp is unset or null"}
+#============================================================================
+
+#history
+#history components include 3 portions:
+#1) EVENT, expand to a history item
+#2) WORD, selects some words from the history item
+#3) MODIFIER, manipulate on the words
+#about EVENT,
+#!!                  expand to last command
+#!n                  expand to the `nth' command
+#!-n                 expand to the last_minus_n command
+#!string             expand to the last command preceding with the `string'
+#!?string?           expand to the last command including the `string'
+#^string1^string2^   substitute the last command
+#!#                  i don't known
+#
+#about WORD,
+#:n                  select the `nth' word (start with 0)
+#:^                  select the first argument
+#:$                  select the last argument
+#:%                  the word matched by the most recent `?string?' search
+#:x-y                select the from `xth' to `yth'
+#:*                  :1-$
+#:x*                 :x-$
+#:x-                 i am not sure...
+#
+#about MODIFIER,
+#:h                  HEAD, when there is filename with path, 
+#                    remove the filename and the contents following it
+#:t                  TAIL, ..., remove the contents above the filename
+#:r                  REGULAR, ...
+#:e                  EXTENSION, ...
+#:p                  PRINT, ...
+#:...                can `man history'
+#
+#ls -al bash.test    # once executed, system saves the CMD line to history
+#!!:0                # execute ``ls"
+#!!:^                # execute ``-al"
+#!!:$                # execute ``bash.test"
+#!!:1-$              # execute ``-al bash.test"
+#!!:0*               # execute ``ls -al bash.test"
+#!!:0:p              # print `ls'
+#!!:$:p              # print `bash.test'
+#!!:^*:p             # print `-al bash.test'
+#============================================================================
+
+#redirection
+#[n]<word redirecting input
+#[n]>word redirecting output
+#[n]>&digit- copy digital descriptor to n and close digital descriptor
+#[n]<&digit- copy digital descriptor to n and close digital descriptor
+#============================================================================
+
+#here document
+#[n]<<[-]word
+#       here-document
+#delimiter
+#here string
+#[n]<<< word
+#============================================================================
+
+#tree
+#usage: tree [-adfghilnpqrstuvxACDFNS] [-H baseHREF] [-T title ] 
+#   [-L level [-R]] [-P pattern] [-I pattern] 
+#   [-o filename] [--version] [--help] [--inodes]
+#	[--device] [--noreport] [--nolinks] [--dirsfirst] [--charset charset]
+#	[--filelimit #] [<directory list>]
+#  -a            All files are listed.
+#  -d            List directories only.
+#  -l            Follow symbolic links like directories.
+#  -f            Print the full path prefix for each file.
+#  -i            Don't print indentation lines.
+#  -q            Print non-printable characters as '?'.
+#  -N            Print non-printable characters as is.
+#  -p            Print the protections for each file.
+#  -u            Displays file owner or UID number.
+#  -g            Displays file group owner or GID number.
+#  -s            Print the size in bytes of each file.
+#  -h            Print the size in a more human readable way.
+#  -D            Print the date of last modification.
+#  -F            Appends '/', '=', '*', or '|' as per ls -F.
+#  -v            Sort files alphanumerically by version.
+#  -r            Sort files in reverse alphanumeric order.
+#  -t            Sort files by last modification time.
+#  -x            Stay on current filesystem only.
+#  -L level      Descend only level directories deep.
+#  -A            Print ANSI lines graphic indentation lines.
+#  -S            Print with ASCII graphics indentation lines.
+#  -n            Turn colorization off always (-C overrides).
+#  -C            Turn colorization on always.
+#  -P pattern    List only those files that match the pattern given.
+#  -I pattern    Do not list files that match the given pattern.
+#  -H baseHREF   Prints out HTML format with baseHREF as top directory.
+#  -T string     Replace the default HTML title and H1 header with string.
+#  -R            Rerun tree when max dir level reached.
+#  -o file       Output to file instead of stdout.
+#  --inodes      Print inode number of each file.
+#  --device      Print device ID number to which each file belongs.
+#  --noreport    Turn off file/directory count at end of tree listing.
+#  --nolinks     Turn off hyperlinks in HTML output.
+#  --dirsfirst   List directories before files.
+#  --charset X   Use charset X for HTML and indentation line output.
+#  --filelimit # Do not descend dirs with more than # files in them.
+#============================================================================
+
+#cp specified files with their original dirs.
+#find . -name "*.c" | xargs tar -cvf tmp.tar
+#tar -xvf tmp.tar -C dest_dir
+#============================================================================
+
+#copy all image files to ONE_PLACE
+#searchDirs="~
+#            ~"
+#ignorDirs="~/linux/"
+#imageExts=" BMP PCX TIFF GIF JPEG TGA EXIF FPX SVG CGM PSD WMF CDR EMF 
+#            PICTPCD DXF UFO EPS AI PNG HDRI RAW"
+#
+##1 generate FIND_CMD
+#
+#for wkdir in $searchDirs; do
+#    #1.1 init
+#    set -- 
+#    unset -v hasIgnorPortion
+#    findCmd="find $wkdir "
+#
+#    #1.2 append ignore_portion
+#    [[ -n $ignorDirs ]] && {
+#        set $ignorDirs
+#        for ((i = 1 ; i <= $# ; i++)); do
+#            [[ i -gt 1 ]] && findCmd+="-o "
+#            findCmd+="-ipath ${!i}\* -prune "
+#        done
+#        hasIgnorPortion=1
+#    }
+#
+#    #1.3 append search_portion
+#    [[ -n $imageExts ]] && {
+#        set $imageExts
+#        for ((i = 1 ; i <= $# ; i++)); do
+#            [[ i -gt 1 || -n $hasIgnorPortion ]] && findCmd+="-o "
+#            findCmd+="-iname \*.${!i} -print "
+#        done
+#    }
+#
+#    #2. execute the FIND_CMD
+#    echo "$0" >> dbg.log
+#    echo "$findCmd" >> dbg.log
+#    echo $findCmd | sh
+#done
+#============================================================================
