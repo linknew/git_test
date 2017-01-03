@@ -231,11 +231,10 @@ color_1=$'\e[4;41;33m'
 #============================================================================
 
 #copy all image files to ONE_PLACE
-#searchDirs="~
-#            ~"
-#ignorDirs="~/linux/"
-#imageExts=" BMP PCX TIFF GIF JPEG TGA EXIF FPX SVG CGM PSD WMF CDR EMF 
-#            PICTPCD DXF UFO EPS AI PNG HDRI RAW"
+#searchDirs='.'
+#ignorDirs='./linux-2.6/'
+#imageExts=' BMP PCX TIFF GIF JPEG TGA EXIF FPX SVG CGM PSD WMF CDR EMF 
+#            PICTPCD DXF UFO EPS AI PNG HDRI RAW JPG AAE MOV MP4'
 #
 ##1 generate FIND_CMD
 #
