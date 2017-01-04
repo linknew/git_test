@@ -64,10 +64,10 @@ color_1=$'\e[4;41;33m'
 #============================================================================
 
 #set
-#set a b c d e  #set arguments ($0,$1,...)
-#echo "$# $*"
-#set -x         #open debug
-#set +x         #close debug
+#set a b c d e && echo "$# $*"  #set arguments ($0,$1,...)
+#set -- && echo "$#"            #unset positional arguments
+#set -x                         #open debug
+#set +x                         #close debug
 #============================================================================
 
 #case
