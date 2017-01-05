@@ -3,6 +3,172 @@
 color_0=$'\e[0m'
 color_1=$'\e[4;41;33m'
 
+#definitions
+#token
+#    A sequence of characters considered a single unit by the shell. It
+#    is either a word or an operator.
+#metacharacter
+#    A character that, when unquoted, separates words. A metacharacter
+#    is a space, tab, newline, or one of the following characters: 
+#    `|', `&', `;', `(', `)', `<', or `>'.
+#word
+#    A sequence of characters treated as a unit by the shell. Words may
+#    not include unquoted metacharacters.
+#name
+#    A word consisting solely of letters, numbers, and underscores, and
+#    beginning with a letter or underscore. Names are used as shell
+#    variable and function names. Also referred to as an identifier.
+#operator
+#    A control operator or a redirection operator. See Redirections, for
+#    a list of redirection operators. Operators contain at least one
+#    unquoted metacharacter.
+#control operator
+#    A token that performs a control function. It is a newline or one of
+#    the following: `||', `&&', `&', `;', `;;', `;&', `;;&', `|', `|&',
+#    `(', or `)'.
+#field
+#    A unit of text that is the result of one of the shell expansions.
+#    After expansion, when executing a command, the resulting fields are
+#    used as the command name and arguments.
+#Simple Commands
+#    A simple command is the kind of command encountered most often. 
+#    It's just a sequence of words separated by blanks, 
+#    terminated by one of the shell's control operators. 
+#    The first word generally specifies a command to be executed, 
+#    with the rest of the words being that command's arguments.
+#    The return status  of a simple command is its exit status as provided by 
+#    the POSIX 1003.1 waitpid function, 
+#    or 128+n if the command was terminated by signal n.
+#Lists of Commands
+#    A list is a sequence of one or more pipelines separated by one of the
+#    operators `;', `&', `&&', or `||', 
+#    and optionally terminated by one of `;',`&', or a newline.
+#    Of these list operators, `&&' and `||' have equal precedence, 
+#    followed by `;' and `&', which have equal precedence.
+#============================================================================
+
+#shell operation
+#   The following is a brief description of the shell's operation when it 
+#   reads and executes a command. Basically, the shell does the following:
+#
+#    1. Reads its input from a file, from a string supplied as an argument to 
+#       the -c invocation option, or from the user's terminal.
+#    2. Breaks the input into words and operators, obeying the quoting rules.
+#       These tokens are separated by metacharacters.
+#       Alias expansion is performed by this step.
+#    3. Parses the tokens into simple and compound commands.
+#    4. Performs the various shell expansions, breaking the expanded tokens 
+#       into lists of filenames and commands and arguments.
+#    5. Performs any necessary redirections and removes the 
+#       redirection operators and their operands from the argument list.
+#    6. Executes the command.
+#    7. Optionally waits for the command to complete and 
+#       collects its exit status.
+#============================================================================
+
+#quoting
+#escape character
+#    a non-quoted backslash `\' is the Bash escape character.
+#    It preserves the literal value of the next character than follows, with
+#    the exception of newline.
+#    If a \newline pair appears, and the backslash iterslef is not quoted,
+#    the \newline is treated as a line conitnuation.
+#signal quotes
+#    ignore all special meanings.
+#double quotes
+#    Enclosing characters in double quotes (`"') preserves the 
+#    literal value of all characters within the quotes, with the exception of 
+#    `$', ``', `\', `!'(when history expansion is enabled).
+#    When the shell is in POSIX mode, the `!' 
+#    has no special meaning within double quotes, even when 
+#    history expansion is enabled. 
+#    The character `$' and ``' retain their special meaning within double quotes.
+#    The backslash '\' retains its special meaning only when 
+#    followed by one of the following characters: `$', ``', `"', `\', or newline. 
+#    Within double quotes, backslashes that 
+#    are followed by one of these characters are removed.
+#    Backslashes preceding characters 
+#    without a special meaning are left unmodified. 
+#    A double quote may be quoted within double quotes by 
+#    preceding it with a backslash. 
+#    If enabled, history expansion will be performed unless
+#    an `!' appearing in double quotes is escaped using a backslash. 
+#    The backslash preceding the `!' is not removed.
+#ANSI-C quoting
+#    $'string' ...
+#locale-specific translation
+#    $"string" ...
+#============================================================================
+
+#shell expansions
+#Expansion is performed on the command line after it has been split into tokens. 
+#There are seven kinds of expansion performed:
+# * brace expansion
+# * tilde expansion
+# * parameter and variable expansion
+# * arithmetic expansion
+# * command substitution
+# * word splitting
+# * filename expansion
+# * quote removal (after all expansions)
+#
+#Only brace expansion, word splitting, and filename expansion can 
+#change the number of words of the expansion; 
+#other expansions expand a single word to a single word. 
+#The only exceptions to this are the expansions of "$@"  and "${name[@]}".
+#
+#brace expansion ...
+#tilde expansion ...
+#parameter expansion 
+#    ${parameter:-word} ...
+#    ${parameter:+word} ...
+#    ${parameter:=word} ...
+#    ${parameter:?word} ...
+#    ${parameter:offset} ...
+#    ${parameter:offset:length} ...
+#    ${#parameter} ...
+#    ${parameter#word} ...
+#    ${parameter##word} ...
+#    ${parameter%word} ...
+#    ${parameter%%word} ...
+#    ${parameter/pattern/string} ...
+#    ${parameter^pattern} ...
+#    ${parameter^^pattern}  ...
+#    ${parameter,pattern} ...
+#    ${parameter,,pattern}  ...
+#    ${@:offset:length} ...
+#    ${arry[@]:offset:length} ...
+#    ${!prefix*} ...
+#    ${!name[*]} ...
+#    ...
+#arithmetic expansion 
+#    $(( expression )) ...
+#command substitution
+#    $(command) ...
+#    `command` ...
+#word splitting
+#    The shell scans the results of parameter expansion, 
+#    command substitution, and arithmetic expansion that 
+#    did not occur within double quotes for word splitting.
+#    Note that if no expansion occurs, no splitting is performed.
+#filename expansion ...
+#quote removal ...
+#============================================================================
+
+#redirection
+#[n]<word redirecting input
+#[n]>word redirecting output
+#[n]>&digit- copy digital descriptor to n and close digital descriptor
+#[n]<&digit- copy digital descriptor to n and close digital descriptor
+#============================================================================
+
+#here document
+#[n]<<[-]word
+#       here-document
+#delimiter
+#here string
+#[n]<<< word
+#============================================================================
 
 #function
 #function hi()
@@ -164,21 +330,6 @@ color_1=$'\e[4;41;33m'
 #!!:0:p              # print `ls'
 #!!:$:p              # print `bash.test'
 #!!:^*:p             # print `-al bash.test'
-#============================================================================
-
-#redirection
-#[n]<word redirecting input
-#[n]>word redirecting output
-#[n]>&digit- copy digital descriptor to n and close digital descriptor
-#[n]<&digit- copy digital descriptor to n and close digital descriptor
-#============================================================================
-
-#here document
-#[n]<<[-]word
-#       here-document
-#delimiter
-#here string
-#[n]<<< word
 #============================================================================
 
 #tree
