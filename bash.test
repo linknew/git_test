@@ -228,6 +228,23 @@ color_1=$'\e[4;41;33m'
 #read
 #read x y <<< 1\ 2
 #echo '$x='$x,'$y='$y
+#read -n1 x             #only accept one character
+#read -s x              #security
+#read -p "Enter.." x    #prompt
+#read -t 5 x            #time limit
+#
+##cannot read data from pipe with read??
+#cat aFile | while read x
+#do
+#y+="$x"
+#done
+#echo $y                #`y' is empty because PIPE use different process...
+##we can use:
+#while read x
+#do
+#y+="$x"
+#done < aFile           #redirect the standard input. 
+#echo "$y"              #keep the read in the main process
 #============================================================================
 
 #set
@@ -434,3 +451,84 @@ color_1=$'\e[4;41;33m'
 #    echo $findCmd | sh
 #done
 #============================================================================
+function doExit()
+{
+    printf -- "-----\nbye $1\n"
+    exit $1
+}
+
+function selectYNS()
+{
+#$1 message
+#$2 default selection
+#`Y' return 0, `N' return 1, `S' return 2, otherwise retrns $_NEED_CHECK_FLOW
+
+    local _replay _return
+
+    while read -t 5 -n1 -s -p "$1 $2"$'\010' _replay
+    do
+        _replay=`echo $_replay | tr a-z A-Z`
+
+        case $_replay in
+            Y|N|S) 
+                break ;;
+            ) clear; unset _replay ;;
+            * ) printf "$_replay\n! only 'Yes' or 'No' or 'Skip' is accepted!!\n"; 
+                unset _replay ;;
+        esac
+    done < /dev/tty
+
+    printf "${_replay:=$2}\n"
+    case $_replay in
+        Y) _return=0 ;;
+        N) _return=1 ;;
+        S) _return=2 ;;
+        *) _return=$_NEED_CHECK_FLOW ;;
+    esac
+
+    return $_return
+}
+
+
+declare -r _NEED_CHECK_FLOW=10
+
+while read _size _ext
+do
+#generate .list
+    printf -- "-----\n$_ext $_size\n"
+    sed -n /\\."$_ext"/p RESULT > .list && echo ".list has been generated successfully"
+    nl .list | tail
+
+#waiting for your decision~
+    selectYNS '> Do you want to process this? [Y/N/S]' 'Y'
+    case $? in
+        0) ;;           #yes
+        1) break ;;     #no
+        2) continue ;;  #skip
+        *) doExit $_NEED_CHECK_FLOW ;;
+    esac
+
+#make tar
+    echo "Maybe you should go and have a cup of Tee:)"
+    time echo tar -cf tmp.tar -T .list
+
+#extract from tar
+    time echo tar -xtf tmp.tar -C myLib >.log 2>&1
+
+#check result
+    vim -d .log .list </dev/tty
+
+#waiting for your decision~
+    selectYNS '> Let`s continue the job? [Y/N/S]' 'N'
+    case $? in
+        0) ;;           #yes
+        1) break ;;     #no
+        2) continue ;;  #skip
+        *) doExit $_NEED_CHECK_FLOW ;;
+    esac
+
+done < exts.proc
+
+doExit 0
+
+
