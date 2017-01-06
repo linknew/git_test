@@ -132,6 +132,7 @@ color_1=$'\e[4;41;33m'
 #    ${parameter%word} ...
 #    ${parameter%%word} ...
 #    ${parameter/pattern/string} ...
+#    ${parameter//pattern/string} ...
 #    ${parameter^pattern} ...
 #    ${parameter^^pattern}  ...
 #    ${parameter,pattern} ...
@@ -321,7 +322,7 @@ color_1=$'\e[4;41;33m'
 #:p                  PRINT, ...
 #:...                can `man history'
 #
-#ls -al bash.test    # once executed, system saves the CMD line to history
+#ls -al bash.test    # once executed, system saves this CMD to history
 #!!:0                # execute ``ls"
 #!!:^                # execute ``-al"
 #!!:$                # execute ``bash.test"
@@ -379,6 +380,19 @@ color_1=$'\e[4;41;33m'
 #cp specified files with their original dirs.
 #find . -name "*.c" | xargs tar -cvf tmp.tar
 #tar -xvf tmp.tar -C dest_dir
+#============================================================================
+
+#lowercase/uppercase
+#str=heLlooooooo
+#echo ${str^}
+#echo ${str^^}
+#echo ${str//[a/Oi}
+#echo ${str,,}
+#declare -l toLowercase
+#declare -u toUppercase
+#toLowercase=$str
+#toUppercase=$str
+#echo $toLowercase $toUppercase
 #============================================================================
 
 #copy all image files to ONE_PLACE
