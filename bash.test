@@ -533,39 +533,120 @@ color_1=$'\e[4;41;33m'
 #============================================================================
 
 #arrange images by date
+#
+##0. init
+# _workdir='myLib'
+#_dir=''
+#_filename=''
+#
+##1. list all images
+##1.1 list all files
+#find $_workdir -type f | sed '/\.tar$/d' >.list
+#
+##1.2 generate image list
+#exts=`cat ext.p`
+#for i in $exts
+#do
+#   filter+="|\.$i\$" 
+#done
+#grep -iE "JUST_FOR_PATTING_${filter}" .list >.list.p
+#
+##2. move image to the their own directories
+#while read x
+#do
+##2.1 generate the dir_name according pic's created date
+#    _content="`stat \"$x\" -c%y`"
+#    _dir=${_content%% *}
+#
+##2.2 generate the file_name according hash value
+#    _filename="`shasum \"$x\"`"
+#    _filename=${_filename%% *}
+#
+##2.3 make the dir and mv the file to it
+#    [[ -d "$_workdir/$_dir" ]] || mkdir "$_workdir/$_dir"
+#    mv "$x" $_workdir/$_dir/$_filename &&
+#    echo [done] mv "$x" into "$_workdir/$_dir/$_filename" ||
+#    echo [fail] mv "$x" into "$_workdir/$_dir/$_filename" ;
+#
+#done <.list.p
+#
+##3. ...
+#
+#============================================================================
+
+#arrange images by date
+function _logThis()
+{
+        echo "$1" >>"$_tmpLogfile"
+                return $? ;
+}
+
+function _executeThis()
+{
+        echo "$1" |sh
+                return $? ;
+}
+
+#arrange images by date
+
+#0. init
+_sourceDirs='/cygdrive/c/Users/min.lee/Pictures/'
+_workDir='.'
+_tmpTfile='.t'
+_tmpExtsfile='.ext'
+_tmpListfile='.list'
+_tmpLogfile='.log'
+_tmpErrfile='.err'
+_dir=''
+_filename=''
+_exts=''
+_cmd=''
+
+
+
+#start log
+_logThis $'\n-------------------------------------------------------- '"[`date`]"
+
+
 #1. list all images
+
 #1.1 list all files
-find myLib -type f | sed '/\.tar$/d' >.list
+_cmd="find \"$_sourceDirs\" -type f >$_tmpTfile"
+echo 'searching...'
+_logThis "$_cmd"
+_executeThis "$_cmd"
+echo 'done'
 
-#1.2 generate image list
-exts=`cat ext.p`
-for i in $exts
-do
-   filter+="|\.$i\$" 
+#1.2 extract images & videos
+_exts=`cat "$_tmpExtsfile"`
+for i in $_exts; do
+filter+="|\.$i\$"
 done
-grep -iE "JUST_FOR_PATTING_${filter}" .list >.list.p
+_cmd="grep -iE \"JUST_FOR_PATTING_${filter}\" $_tmpTfile >$_tmpListfile"
+echo 'filter images & videos'
+_logThis "$_cmd"
+_executeThis "$_cmd"
+echo 'done'
 
-#2. move image to the their own directories
-while read x
-do
-#2.1 generate the dir_name according pic's created date
-    _content="`ls -lTU \"$x\"`"
-    _dir=`echo "$_content" | awk '{ print $9"-"$6"-"$7; }'`
-    echo "$_dir"
 
+#2. move images & videos to the the LIB
+echo 'mv images & videos'
+while read x; do
 #2.2 generate the file_name according hash value
-    _filename="`shasum \"$x\"`"
-    echo $_filename
-    _filename="${file_name%% *}"
-    echo "hi$_filename"
-
-#2.2 verify the dir
-    [[ -d "$_dir" ]] || mkdir "$_dir"
-
-
-
-done < .list.p
+_filename="`sha1sum -b \"$x\"`"
+_filename=${_filename%% *}
+_dir=${_filename:0:2}
+_filename=${_filename:2}
+[[ -d ${_dir} ]] || mkdir $_dir
+[[ -f "$_dir$_filename" ]] &&
+echo "$x and $_dir$_filename are same file!" >&2 && continue ;
+_cmd="mv -n \"$x\" \"$_workDir/$_dir/$_filename\""
+echo "$_cmd"
+_logThis "$_cmd"
+_executeThis "$_cmd"
+done <$_tmpListfile | nl
+echo 'done'
 
 #3. ...
-
 #============================================================================
+
