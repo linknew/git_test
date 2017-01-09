@@ -2,6 +2,20 @@
 
 color_0=$'\e[0m'
 color_1=$'\e[4;41;33m'
+ctrl_k=$'\e[K'
+ctrl_l=$'\e[2J'
+hide_cursor=$'\e[?25l'
+show_curson=$'\e[?25h'
+#save_cursor=$'\e[s'        #???
+#restore_cursor=$'\e[u'     #???
+#setXYCursor="\033[y;xH"    #??? with echo -e
+
+_rep=1
+scroll_cursor="\033[${_rep}S"
+unNLineCurson="\033[${_rep}A"    #with echo -e
+dnNLineCurson="\033[${_rep}B"    #with echo -e
+rtNColCurson="\033[${_rep}C"     #with echo -e
+lfNColCurson="\033[${_rep}D"     #with echo -e
 
 #definitions
 #token
@@ -577,21 +591,24 @@ color_1=$'\e[4;41;33m'
 #arrange images by date
 function _logThis()
 {
-        echo "$1" >>"$_tmpLogfile"
-                return $? ;
+#$1, log message
+#$2, if exist, prints to standard output
+    echo "$1" >>"$_tmpLogfile"
+    [[ -z $2 ]] || echo "$1"
+    return $? ;
 }
 
 function _executeThis()
 {
-        echo "$1" |sh
-                return $? ;
+    echo "$1" |sh
+    return $? ;
 }
 
 #arrange images by date
 
 #0. init
-_sourceDirs='/cygdrive/c/Users/min.lee/Pictures/'
-_workDir='.'
+_sourceDirs='myLib'
+_workDir='myLib'
 _tmpTfile='.t'
 _tmpExtsfile='.ext'
 _tmpListfile='.list'
@@ -600,53 +617,58 @@ _tmpErrfile='.err'
 _dir=''
 _filename=''
 _exts=''
+_filter=''
 _cmd=''
+_idc=('/' '-' '\' '|')
 
 
-
+{
 #start log
-_logThis $'\n-------------------------------------------------------- '"[`date`]"
-
+#echo -e "$hide_cursor"
+    _logThis $'\n-------------------------------------------------------- '"[`date`]" -p >&2
 
 #1. list all images
 
 #1.1 list all files
-_cmd="find \"$_sourceDirs\" -type f >$_tmpTfile"
-echo 'searching...'
-_logThis "$_cmd"
-_executeThis "$_cmd"
-echo 'done'
+    _cmd="find \"$_sourceDirs\" -type f >$_tmpTfile"
+    echo -ne " *  |searching..."
+    _logThis "$_cmd"
+    _executeThis "$_cmd"
+    echo -ne "\rdone\n"
 
 #1.2 extract images & videos
-_exts=`cat "$_tmpExtsfile"`
-for i in $_exts; do
-filter+="|\.$i\$"
-done
-_cmd="grep -iE \"JUST_FOR_PATTING_${filter}\" $_tmpTfile >$_tmpListfile"
-echo 'filter images & videos'
-_logThis "$_cmd"
-_executeThis "$_cmd"
-echo 'done'
+    _exts=`cat "$_tmpExtsfile"`
+    for i in $_exts; do
+    _filter+="|\.$i\$"
+    done
+    _cmd="grep -iE \"JUST_FOR_PATTING_${_filter}\" $_tmpTfile >$_tmpListfile"
+    echo -ne " *  |filter images & videos"
+    _logThis "$_cmd"
+    _executeThis "$_cmd"
+    echo -ne "\rdone\n"
 
 
 #2. move images & videos to the the LIB
-echo 'mv images & videos'
-while read x; do
-#2.2 generate the file_name according hash value
-_filename="`sha1sum -b \"$x\"`"
-_filename=${_filename%% *}
-_dir=${_filename:0:2}
-_filename=${_filename:2}
-[[ -d ${_dir} ]] || mkdir $_dir
-[[ -f "$_dir$_filename" ]] &&
-echo "$x and $_dir$_filename are same file!" >&2 && continue ;
-_cmd="mv -n \"$x\" \"$_workDir/$_dir/$_filename\""
-echo "$_cmd"
-_logThis "$_cmd"
-_executeThis "$_cmd"
-done <$_tmpListfile | nl
-echo 'done'
+    echo -ne " *  |mv images & videos\n"
+    while read x; do
+        _filename="`shasum -b \"$x\"`" && _filename=${_filename%% *}
+        _dir=${_filename:0:2} && _filename=${_filename:2}
+        [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
+        [[ -f "$_workDir/$_dir/$_filename" ]] &&
+            echo "$x and $_workDir/$_dir/$_filename are same file!" >&2 && continue ;
+        _cmd="mv -n \"$x\" \"$_workDir/$_dir/$_filename\""
+        echo -ne "\r ${_idc[i++%4]}  |$_cmd$ctrl_k"
+        _logThis "$_cmd"
+        _executeThis "$_cmd"
+    done <$_tmpListfile
+    _rep=1 && echo -ne "\r${unNLineCurson}done\ndone\n\n"
+
+#make the workdir clean
+    rm $_tmpTfile
+    rm $_tmpListfile
+} 2>$_tmpErrfile
 
 #3. ...
+#echo -e "$show_curson"
 #============================================================================
 
