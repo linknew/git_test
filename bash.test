@@ -472,7 +472,7 @@ show_curson=$'\e[?25h'
 #    #2. execute the FIND_CMD
 #    echo "$0" >> dbg.log
 #    echo "$findCmd" >> dbg.log
-#    echo $findCmd | sh
+#    echo $findCmd | bash
 #done
 #============================================================================
 #function doExit()
@@ -610,7 +610,7 @@ function logThis()
 
 function execThis()
 {
-    echo "$1" |sh
+    echo "$1" |bash
     return $? ;
 }
 
@@ -623,26 +623,25 @@ _tmpSeedsFile='.seed'
 _tmpListFile='.list'
 _tmpLogFile='.log'
 _tmpErrFile='.err'
+_indexFile='.INDEX'
 
 _sourceDirs='myLib'
 _workDir='myLib'
-_filter=''
-_cmd=''
-_dir=''
-_file=''
 _idc=('/' '-' '\' '|')
+_tmpStr=''
+_cmd=''
 
 #start the routine
 {
 #0. start log and hide cursor
 #echo -e "$hide_cursor"
-    logThis $'\n------------------------------------------ '"[`date`]" -p >&2
+    logThis $'\n------------------------------------------ '"[$(date)]" -p >&2
 
 #1. list all images
 
 #1.1 list all files
     echo -ne " *  |searching..."
-    _cmd="find \"$_sourceDirs\" -type f >$_tmpFile"
+    _cmd="find '$_sourceDirs' -type f >$_tmpFile"
     logThis "$_cmd"
     execThis "$_cmd"
     echo -ne "\rdone\n"
@@ -660,24 +659,31 @@ _idc=('/' '-' '\' '|')
     echo -ne "\rdone\n"
 
 #1.3 extract images & videos
+
+    _filter=''
+
     echo -ne " *  |filter images & videos"
-    for i in `cat "$_tmpSeedsFile"`; do
+    for i in $(cat "$_tmpSeedsFile"); do
         _filter+="|\.$i\$"
     done
-    _cmd="grep -iE \"JUST_FOR_PATTING_${_filter}\" $_tmpFile >$_tmpListFile"
+    _cmd="grep -iE 'JUST_FOR_PATTING_${_filter}' $_tmpFile >$_tmpListFile"
     logThis "$_cmd"
     execThis "$_cmd"
     echo -ne "\rdone\n"
 
 #2. move images & videos to the the LIB
+
+    _dir=''
+    _file=''
+
     echo -ne " *  |moving images & videos\n"
     while read x; do
-        _tmpStr="`$_cmd4HashSum -b \"$x\"`" ; 
+        _tmpStr=$($_cmd4HashSum -b "$x") ; 
         _tmpStr=${_tmpStr%% *}
         _dir=${_tmpStr:0:2} ; 
         _file=${_tmpStr:2}
         _tmpStr="$_workDir/$_dir/$_file"
-        _cmd="mv -n \"$x\" \"$_tmpStr\""
+        _cmd="mv -n '$x' '$_tmpStr'"
         echo -ne "\r ${_idc[i++%4]}  |$_cmd$ctrl_k"
         [[ -f "$_tmpStr" ]] && echo "$x SAME WITH $_tmpStr" >&2 && continue;
         [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
@@ -686,8 +692,6 @@ _idc=('/' '-' '\' '|')
     done <$_tmpListFile
     mvCursor u
     echo -ne "\rdone\n\rdone\n"
-
-
 
 #3. make indexing
 #   the format of content from .log is:
@@ -704,22 +708,19 @@ _idc=('/' '-' '\' '|')
 #   now, we get the `A', the hardest part to extractor :)
 #   ...
 
-    echo -ne " *  |making index"
-    _indexFile='.INDEX'
-    _head='^mv -n "'
-    _middle='" "'
-    _tail='"$'
-    _uniq="`date | $_cmd4HashSum`"
-    _uniq=${_uniq%% *}
+    _head="^mv -n '"
+    _middle="' '"
+    _tail="'$"
 
-    sed -n "
+    echo -ne " *  |making index"
+    sed -En "
     /$_head/{
-        s/$_head\|$_tail//g
-        h                       # cp to 'hode' space
-        s/^.*$_middle//         # get 'B'
-        x                       # xchange 'hode' and 'global' space
-        s/$_middle[^ ]*$//      # get 'A'
-        s/^.*\.//               # get the Extension of 'A'
+        s/$_head|$_tail//g
+        h
+        s/^.*$_middle//
+        x
+        s/$_middle[^ ]*$//
+        s/^.*\.//
         H
         x
         s/\n/./
