@@ -13,7 +13,7 @@ function mvCursor()
 #   $2, the colums/lines number from current position, default is `1'
 
     local _direction=`echo $1 | tr udlr ABDC`
-    echo -ne "\e[${2:-1}${_direction}"
+    echo -ne "\033[${2:-1}${_direction}"
 }
 
 colrN=$'\e[0m'            #normal
@@ -669,17 +669,25 @@ _cmd=''
     echo -ne "\rdone\n"
 #
 #1.2 get the seeds
+#
+    _tmpFile2=.t2
+#
     echo -ne " *  |select the types which you want to proceed to"
-    echo '# select the types which you want to proceed to.' >$_tmpSeedsFile
-    echo '# after completing, remove the 2 lines and saving' >>$_tmpSeedsFile
-    _cmd="cat $_tmpFile | sed 's/^.*\.//' | sort -u >>$_tmpSeedsFile"
-    logThis "$_cmd"
-    execThis "$_cmd"
-    _cmd="vim -c':read $_tmpSeedsFile' $_tmpFile</dev/tty"
+    _cmd="
+        cat $_tmpFile |sed 's/^.*\.//' |sort -u >$_tmpFile2 ;
+        :>$_tmpSeedsFile ;
+        vim -c'
+            execute setline(1, \"# list all Extensions of found files here\") |
+            execute setline(2, \"# remove those which you do not want to proceed\") |
+            execute setline(3, \"# after having done this, remove these prompt message\") |
+            execute setline(4, \"# then, do saving&quiting to let processing continue\") |
+            execute line(\"$\") |
+            read $_tmpFile2 |
+            execute line(\"^\")' $_tmpSeedsFile</dev/tty ;
+        rm $_tmpFile2 ;"
     logThis "$_cmd"
     execThis "$_cmd"
     echo -ne "\rdone\n"
-    exit 2
 #
 #1.3 extract images & videos
 #
@@ -750,10 +758,9 @@ _cmd=''
         p
     } " $_tmpLogFile >>"$_indexFile"
 #
-    _cmd="sort -u $_indexFile >$_tmpFile"
-    logThis "$_cmd"
-    execThis "$_cmd"
-    _cmd="cp $_tmpFile $_indexFile"
+    _cmd="
+        sort -u $_indexFile >$_tmpFile ;
+        cp $_tmpFile $_indexFile ;"
     logThis "$_cmd"
     execThis "$_cmd"
     echo -ne "\rdone\n"
