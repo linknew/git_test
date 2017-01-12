@@ -1,36 +1,101 @@
 #! /bin/bash
 
+ctrl_k=$'\e[K'
+ctrl_l=$'\e[2J'
+
+#functions for cursor operations.
+#
 function mvCursor()
 {
-#Description:
+#Descriptions:
 #   move cursor.
 #Parameters:
 #   $1, the direction of moving.
-#       `l' for left
-#       `r' for right
-#       `u' for up
-#       `d' for down
-#   $2, the colums/lines number from current position, default is `1'
-
-    local _direction=`echo $1 | tr udlr ABDC`
-    echo -ne "\033[${2:-1}${_direction}"
+#       `l' move left,   mapping to \033[D
+#       `r' move righ,   mapping to \033[C
+#       `u' move up,     mapping to \033[A
+#       `d' move down,   mapping to \033[B
+#       `g' goto column, mapping to \033[G
+#       `j' jump to x;y, mapping to \033[H
+#   $2, count of repeats for line
+#   $3, the value of `y' for jump to ``x;y"
+#
+#
+    local _direction=`echo $1 | tr ludgjr DABGHC`
+    echo -ne "\033[${2:-1}${3:+;$3}${_direction}"
+    return $?
 }
+#
+function hideCursor()
+{
+    echo -ne $'\e[?25l'
+    return $?
+}
+#
+function showCursor()
+{
+    echo -ne $'\e[?25h'
+    return $?
+}
+#
+function saveCursor()
+{
+    echo -ne $'\e[s'
+    return $?
+}
+#
+function restoreCursor()
+{
+    echo -ne $'\e[u'      #cannot work???
+    return $?
+}
+#============================================================================
 
-colrN=$'\e[0m'            #normal
-colrH=$'\e[1;36m'         #highlight
-colrW=$'\e[1;33m'         #warning
-colrE=$'\e[1;31m'         #error
-colrS=$'\e[7;32m'         #success
-colrF=$'\e[7;31m'         #fail
-ctrl_k=$'\e[K'
-ctrl_l=$'\e[2J'
-hide_cursor=$'\e[?25l'
-show_curson=$'\e[?25h'
-#save_cursor=$'\e[s'        #???
-#restore_cursor=$'\e[u'     #???
-#setXYCursor="\e[y;xH"    #??? with echo -e
-
-
+#functions for functional message displaying
+#
+shopt -s expand_aliases
+#
+alias showNor='showMsg N'
+alias showHi='showMsg H'
+alias showWarn='showMsg W'
+alias showErr='showMsg E'
+alias showOk='showMsg S'
+alias showFail='showMsg F'
+#
+function showMsg()
+{
+#Descriptions:
+#   display functional messages such as Warning,Error,Fail...
+#   implement by useing ``echo -ne"
+#   caller should handle the format issues.
+#   insert `\r' `\n' etc. in the message to control the format
+#Parameters:
+#   $1, message type
+#       `N'     normal message
+#       `H'     highlight message
+#       `W'     warning message
+#       `E'     error message
+#       `F'     failure message
+#       `S'     success message
+#   $2, message content
+#   
+    local _msgType=$1
+    local _colrN=$'\e[0m'
+    local _color
+#
+    case $_msgType in
+    H|h) _color=$'\e[1;36m' ;;
+    W|w) _color=$'\e[1;33m' ;;
+    E|e) _color=$'\e[1;31m' ;;
+    S|s) _color=$'\e[7;32m' ;;
+    F|f) _color=$'\e[7;31m' ;;
+    *)   _color=$'\e[0m' ;;
+    esac
+#
+    echo -ne "$_color$2$_colrN"
+    return $?
+}
+#============================================================================
 
 #definitions
 #token
@@ -257,7 +322,7 @@ show_curson=$'\e[?25h'
 #		echo bye bye
 #		break
 #	fi
-#	echo $colrH"ls $name"$colrN
+#	echo $_colrH"ls $name"$_colrN
 #	ls $name
 #done
 #============================================================================
@@ -296,7 +361,7 @@ show_curson=$'\e[?25h'
 #while read i
 #do
 #	case $i in
-#	*) echo "you have input $colrH'$i'$colrN, go on" ;;&	# use ;;&
+#	*) echo "you have input $_colrH'$i'$_colrN, go on" ;;&	# use ;;&
 #	a) echo 'here is a, stop' ;;								# use ;;
 #	b) echo 'here is b, have a rest and go on' ;&				# use ;&
 #	c) echo 'here is c, stop' ;;
@@ -634,45 +699,48 @@ function execThis()
 _sourceDirs=$1
 _workDir=$2
 _cmd4HashSum='shasum'
-
-#the value of following variables 
-_tmpFile='.t'
-_tmpSeedsFile='.seed'
-_tmpListFile='.list'
-_tmpLogFile='.log'
-_tmpErrFile='.err'
+#
+_tmpFile=".t"
+_tmpFile2=".t2"
+_tmpLogFile=".log"
+_tmpSeedsFile=".seed"
+_tmpListFile=".list"
 _indexFile="${_workDir%%/}/.INDEX"
 _idc=('/' '-' '\' '|')
 _tmpStr=''
 _cmd=''
 
-
-#start the routine
-{
+#start routine
+#
 #0. checking parameters, start log, hide cursor
-    logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
-    [[ -z $1 || -z $2 ]] && 
-        echo -e "${colrE}Usage:\n  ${0##*/} sourDir destDir${colrN}" && 
-        exit 1
-    [[ ! -d $1 || ! -d $2 ]] &&
-        echo -e "${colrW}Warning:\nsourDir or destDir MUST be a directory!!${colrN}" &&
-        exit 1
-#   echo -e "$hide_cursor"
+[[ -z $1 || -z $2 ]] && 
+    showErr "Usage:\n  ${0##*/} sourDir destDir\n" && 
+    exit 1
+[[ ! -d $1 || ! -d $2 ]] &&
+    showWarn "Warning:\nsourDir or destDir MUST be a directory!!\n" &&
+    exit 1
+:>$_tmpSeedsFile && :>$_tmpListFile && 
+    :>$_tmpFile && :>$_tmpFile2 && :>>$_tmpLogFile || 
+    showErr "Fail to creat one of following temporary files:
+        \r\t$_tmpLogFile
+        \r\t$_tmpFile
+        \r\t$_tmpFile2
+        \r\t$_tmpSeedsFile
+        \r\t$_tmpListFile"
+logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
+#   hideCursor
 
 #1. list all images
 #
 #1.1 list all files
-    echo -ne " *  |searching..."
+    showNor " *  |searching..." 
     _cmd="find '$_sourceDirs' -type f >$_tmpFile"
     logThis "$_cmd"
     execThis "$_cmd"
-    echo -ne "\rdone\n"
+    showNor "\rdone\n" 
 #
-#1.2 get the seeds
-#
-    _tmpFile2=.t2
-#
-    echo -ne " *  |select the types which you want to proceed to"
+#1.2 select the files which to be processing according Extensions.
+    showNor " *  |select the types which you want to proceed to" 
     _cmd="
         cat $_tmpFile |sed 's/^.*\.//' |sort -u >$_tmpFile2 ;
         :>$_tmpSeedsFile ;
@@ -682,32 +750,31 @@ _cmd=''
             execute setline(3, \"# after having done this, remove these prompt message\") |
             execute setline(4, \"# then, do saving&quiting to let processing continue\") |
             execute line(\"$\") |
-            read $_tmpFile2 |
-            execute line(\"^\")' $_tmpSeedsFile</dev/tty ;
-        rm $_tmpFile2 ;"
+            read ${_tmpFile2} |
+            execute line(\"^\")' $_tmpSeedsFile</dev/tty ;"
     logThis "$_cmd"
     execThis "$_cmd"
-    echo -ne "\rdone\n"
+    showNor "\rdone\n" 
 #
 #1.3 extract images & videos
 #
     _filter=''
 #
-    echo -ne " *  |filter images & videos"
+    showNor " *  |filter images & videos" 
     for i in $(cat "$_tmpSeedsFile"); do
         _filter+="|\.$i\$"
     done
     _cmd="grep -iE 'JUST_FOR_PATTING_${_filter}' $_tmpFile >$_tmpListFile"
     logThis "$_cmd"
     execThis "$_cmd"
-    echo -ne "\rdone\n"
+    showNor "\rdone\n" 
 
 #2. move images & videos to the the LIB
 #
     _dir=''
     _file=''
 #
-    echo -ne " *  |moving images & videos\n"
+    showNor " *  |moving images & videos\n" 
     while read x; do
         _tmpStr=$($_cmd4HashSum -b "$x") ; 
         _tmpStr=${_tmpStr%% *}
@@ -715,14 +782,14 @@ _cmd=''
         _file=${_tmpStr:2}
         _tmpStr="$_workDir/$_dir/$_file"
         _cmd="mv -n '$x' '$_tmpStr'"
-        echo -ne "\r ${_idc[i++%4]}  |$_cmd$ctrl_k"
-        [[ -f "$_tmpStr" ]] && echo "$x SAME WITH $_tmpStr" >&2 && continue;
+        showNor "\r ${_idc[i++%4]}  |$_cmd$ctrl_k" 
+        [[ -f "$_tmpStr" ]] && mvCursor g 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
         [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
         logThis "$_cmd"
         execThis "$_cmd"
     done <$_tmpListFile
     mvCursor u
-    echo -ne "\rdone\n\rdone\n"
+    showNor "\rdone\n\rdone\n" 
 
 #3. make indexing
 #   the format of content from .log is:
@@ -743,7 +810,7 @@ _cmd=''
     _middle="' '"
     _tail="'$"
 #
-    echo -ne " *  |making index"
+    showNor " *  |making index" 
     sed -En "
     /$_head/{
         s/$_head|$_tail//g
@@ -763,30 +830,59 @@ _cmd=''
         cp $_tmpFile $_indexFile ;"
     logThis "$_cmd"
     execThis "$_cmd"
-    echo -ne "\rdone\n"
-
-} 2>>$_tmpErrFile
+    showNor "\rdone\n" 
+#
 
 #z. make the workdir clean
 #rm $_tmpListFile
 #rm $_tmpSeedsFile
 #rm $_tmpLogFile
-#rm $_tmpErrFile
     rm $_tmpFile
-    echo -e "
-    ${colrH}
-    .seed  <- file types shall be processed
-    .list  <- files shall be processed
-    .log   <- runing log
-    .err   <- error informations
-    ${colrW}The above 4 files are processing logs. you can remove them safety.
-
-    ${colrH}$_indexFile <- pic&vid database
-    ${colrW}The .INDEX file is very important. 
-    ${colrE}DO NOT remove it!!
-    ${colrN}"
+    rm $_tmpFile2
+    showHi "
+    \r  $_tmpSeedsFile <- file types shall be processed
+    \r  $_tmpListFile <- files shall be processed
+    \r  $_tmpLogFile  <- runing log\n"
+    showWarn "  The above 3 files are processing logs. you can remove them safety.\n" 
+#
+    showHi "
+    \r  $_indexFile <- pic&vid database\n" 
+    showWarn "  The .INDEX file is very important.\n" 
+    showErr "  DO NOT remove it!!\n\n" 
     
 #
-#echo -e "$show_curson"
+#   showCursor
 #============================================================================
+
+#check the functional of \033[N`x', which `x' will change from a~z & A~Z
+#function show()
+#{
+#    echo -ne "\033[$1;$2H$3"
+#    return $?
+#}
+#
+#echo -ne "\033[2J"
+#
+#declare -i x y
+#
+#for ((x = 1;x<=43;x++)) {
+#    for ((y=0;y<=160;y+=10)){
+#        [[ $x -eq 1 ]] && str=$y || str=.
+#        [[ $y -eq 0 && ${x##?} -eq 0 ]] && str=$x
+#        echo -ne "\033[${x};${y}H${str%%0}"
+#    }
+#}
+#
+#show 10 50 X
+#show 30 100 X
+#show 30 100
+#x=10
+#for dir in {A..Z}
+#do
+#    read -n1 c
+#    echo -ne "\033[$x$dir$dir----------"
+#    show 30 100 X
+#done
+#============================================================================
+
 
