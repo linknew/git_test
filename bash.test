@@ -53,13 +53,13 @@ function blinkCursor()
 {
     local _x
 #
-    while ture; do
+    while true; do
         hideCursor
         sleep 0.1
         showCursor
         read -s -n1 -t1 _x </dev/tty && break
     done
-    echo _x
+    echo $_x
 }
 #
 #
@@ -128,6 +128,7 @@ shopt -s expand_aliases
 alias showNor='showMsg N'
 alias showHi='showMsg H'
 alias showWarn='showMsg W'
+alias showAlrt='showMsg A'
 alias showErr='showMsg E'
 alias showOk='showMsg S'
 alias showFail='showMsg F'
@@ -144,6 +145,7 @@ function showMsg()
 #       `N'     normal message
 #       `H'     highlight message
 #       `W'     warning message
+#       `A'     Alert message
 #       `E'     error message
 #       `F'     failure message
 #       `S'     success message
@@ -154,6 +156,7 @@ function showMsg()
     local -r _colrN=$'\e[0m'
 #
     case $_msgType in
+    A|a) _color=$'\e[1;31m' ;;
     H|h) _color=$'\e[1;36m' ;;
     W|w) _color=$'\e[1;33m' ;;
     E|e) _color=$'\e[1;31m' ;;
@@ -749,210 +752,214 @@ function showMsg()
 #============================================================================
 
 #arrange images by date
-#function logThis()
-#{
-##Parameters:
-##   $1, log message
-##   $2, if exist, prints to standard output
-#    echo "$1" >>"$_tmpLogFile"
-#    [[ $2 == '-p' ]] && echo "$1"
-#}
+function logThis()
+{
+#Parameters:
+#   $1, log message
+#   $2, if exist, prints to standard output
+    echo "$1" >>"$_tmpLogFile"
+    [[ $2 == '-p' ]] && echo "$1"
+}
+
+function execThis()
+{
+#Parameters:
+#   $1, the command
+    echo "$1" |bash
+}
+
+#init
+_sourceDirs=$1
+_workDir=$2
+_cmd4HashSum='shasum'
 #
-#function execThis()
-#{
-##Parameters:
-##   $1, the command
-#    echo "$1" |bash
-#}
+_tmpFile=".t"
+_tmpFile2=".t2"
+_tmpLogFile=".log"
+_tmpSeedsFile=".seed"
+_tmpListFile=".list"
+_indexFile="${_workDir%%/}/.INDEX"
+_idc=('/' '-' '\' '|')
+_tmpStr=''
+_cmd=''
+
+#start routine
 #
-##init
-#_sourceDirs=$1
-#_workDir=$2
-#_cmd4HashSum='shasum'
-##
-#_tmpFile=".t"
-#_tmpFile2=".t2"
-#_tmpLogFile=".log"
-#_tmpSeedsFile=".seed"
-#_tmpListFile=".list"
-#_indexFile="${_workDir%%/}/.INDEX"
-#_idc=('/' '-' '\' '|')
-#_tmpStr=''
-#_cmd=''
+#0. checking parameters, start log, hide cursor
+[[ -z $1 || -z $2 ]] && 
+    showErr "Usage:\n  ${0##*/} sourDir destDir\n" && 
+    exit 1
+[[ ! -d $1 || ! -d $2 ]] &&
+    showWarn "Warning:\nsourDir or destDir MUST be a directory!!\n" &&
+    exit 1
+:>$_tmpSeedsFile && :>$_tmpListFile && 
+    :>$_tmpFile && :>$_tmpFile2 && :>>$_tmpLogFile || 
+    showErr "Fail to creat one of following temporary files:
+        \r\t$_tmpLogFile
+        \r\t$_tmpFile
+        \r\t$_tmpFile2
+        \r\t$_tmpSeedsFile
+        \r\t$_tmpListFile"
+logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
+#   hideCursor
+
+#1. list all images
 #
-##start routine
-##
-##0. checking parameters, start log, hide cursor
-#[[ -z $1 || -z $2 ]] && 
-#    showErr "Usage:\n  ${0##*/} sourDir destDir\n" && 
-#    exit 1
-#[[ ! -d $1 || ! -d $2 ]] &&
-#    showWarn "Warning:\nsourDir or destDir MUST be a directory!!\n" &&
-#    exit 1
-#:>$_tmpSeedsFile && :>$_tmpListFile && 
-#    :>$_tmpFile && :>$_tmpFile2 && :>>$_tmpLogFile || 
-#    showErr "Fail to creat one of following temporary files:
-#        \r\t$_tmpLogFile
-#        \r\t$_tmpFile
-#        \r\t$_tmpFile2
-#        \r\t$_tmpSeedsFile
-#        \r\t$_tmpListFile"
-#logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
-##   hideCursor
+#1.1 list all files
+    showNor " *  |searching..." 
+    _cmd="find '$_sourceDirs' -type f >$_tmpFile"
+    logThis "$_cmd"
+    execThis "$_cmd"
+    showNor "\rdone\n" 
 #
-##1. list all images
-##
-##1.1 list all files
-#    showNor " *  |searching..." 
-#    _cmd="find '$_sourceDirs' -type f >$_tmpFile"
-#    logThis "$_cmd"
-#    execThis "$_cmd"
-#    showNor "\rdone\n" 
-##
-##1.2 select the files which to be processing according Extensions.
-#    showNor " *  |select the types which you want to proceed to" 
-#    _cmd="
-#        cat $_tmpFile |sed 's/^.*\.//' |sort -u >$_tmpFile2 ;
-#        :>$_tmpSeedsFile ;
-#        vim -c'
-#            execute setline(1, \"# list all Extensions of found files here\") |
-#            execute setline(2, \"# remove those which you do not want to proceed\") |
-#            execute setline(3, \"# after having done this, remove these prompt message\") |
-#            execute setline(4, \"# then, do saving&quiting to let processing continue\") |
-#            execute line(\"$\") |
-#            read ${_tmpFile2} |
-#            execute line(\"^\")' $_tmpSeedsFile</dev/tty ;"
-#    logThis "$_cmd"
-#    execThis "$_cmd"
-#    showNor "\rdone\n" 
-##
-##1.3 extract images & videos
-##
-#    _filter=''
-##
-#    showNor " *  |filter images & videos" 
-#    for i in $(cat "$_tmpSeedsFile"); do
-#        _filter+="|\.$i\$"
-#    done
-#    _cmd="grep -iE 'JUST_FOR_PATTING_${_filter}' $_tmpFile >$_tmpListFile"
-#    logThis "$_cmd"
-#    execThis "$_cmd"
-#    showNor "\rdone\n" 
+#1.2 select the files which to be processing according Extensions.
+    showNor " *  |select the types which you want to proceed to" 
+    _cmd="
+        cat $_tmpFile |sed 's/^.*\.//' |sort -u >$_tmpFile2 ;
+        :>$_tmpSeedsFile ;
+        vim -c'
+            execute setline(1, \"# list all Extensions of found files here\") |
+            execute setline(2, \"# remove those which you do not want to proceed\") |
+            execute setline(3, \"# after having done this, remove these prompt message\") |
+            execute setline(4, \"# then, do saving&quiting to let processing continue\") |
+            execute line(\"$\") |
+            read ${_tmpFile2} |
+            execute line(\"^\")' $_tmpSeedsFile</dev/tty ;"
+    logThis "$_cmd"
+    execThis "$_cmd"
+    showNor "\rdone\n" 
 #
-##2. move images & videos to the the LIB
-##
-#    _dir=''
-#    _file=''
-##
-#    showNor " *  |moving images & videos\n" 
-#    while read x; do
-#        _tmpStr=$($_cmd4HashSum -b "$x") ; 
-#        _tmpStr=${_tmpStr%% *}
-#        _dir=${_tmpStr:0:2} ; 
-#        _file=${_tmpStr:2}
-#        _tmpStr="$_workDir/$_dir/$_file"
-#        _cmd="mv -n '$x' '$_tmpStr'"
-#        showNor "\r ${_idc[i++%4]}  |$_cmd$ctrl_k" 
-#        [[ -f "$_tmpStr" ]] && mvCursor g 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
-#        [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
-#        logThis "$_cmd"
-#        execThis "$_cmd"
-#    done <$_tmpListFile
-#    mvCursor u
-#    showNor "\rdone\n\rdone\n" 
+#1.3 extract images & videos
 #
-##3. make indexing
-##   the format of content from .log is:
-##   mv -n ``source" "dest_named_by_hashcode"
-##   mv -n "A" "B"
-##   `A' is source file name, may include `"'
-##   `B' is the destination file, named by its own hash-code
-##   we need extractor the Extension of `A' and concatenate with `B'.
-##   as `A' may include `"', substitute all `"' out of `A' is a good idea
-##   first, remove _head and _tail.  <-- easy to do
-##   then we get ``A_middleB" ,save it to the hold place of ``sed",
-##   next, remove _middle an `B'.
-##   It's easy to approach as `B' has such a reqular name.
-##   now, we get the `A', the hardest part to extractor :)
-##   ...
-##
-#    _head="^mv -n '"
-#    _middle="' '"
-#    _tail="'$"
-##
-#    showNor " *  |making index" 
-#    sed -En "
-#    /$_head/{
-#        s/$_head|$_tail//g
-#        h
-#        s/^.*$_middle//
-#        x
-#        s/$_middle[^ ]*$//
-#        s/^.*\.//
-#        H
-#        x
-#        s/\n/./
-#        p
-#    } " $_tmpLogFile >>"$_indexFile"
-##
-#    _cmd="
-#        sort -u $_indexFile >$_tmpFile ;
-#        cp $_tmpFile $_indexFile ;"
-#    logThis "$_cmd"
-#    execThis "$_cmd"
-#    showNor "\rdone\n" 
-##
+    _filter=''
 #
-##z. make the workdir clean
-##rm $_tmpListFile
-##rm $_tmpSeedsFile
-##rm $_tmpLogFile
-#    rm $_tmpFile
-#    rm $_tmpFile2
-#    showHi "
-#    \r  $_tmpSeedsFile <- file types shall be processed
-#    \r  $_tmpListFile <- files shall be processed
-#    \r  $_tmpLogFile  <- runing log\n"
-#    showWarn "  The above 3 files are processing logs. you can remove them safety.\n" 
-##
-#    showHi "
-#    \r  $_indexFile <- pic&vid database\n" 
-#    showWarn "  The .INDEX file is very important.\n" 
-#    showErr "  DO NOT remove it!!\n\n" 
-#    
-##
-##   showCursor
+    showNor " *  |filter images & videos" 
+    for i in $(cat "$_tmpSeedsFile"); do
+        _filter+="|\.$i\$"
+    done
+    _cmd="grep -iE 'JUST_FOR_PATTING_${_filter}' $_tmpFile >$_tmpListFile"
+    logThis "$_cmd"
+    execThis "$_cmd"
+    showNor "\rdone\n" 
+
+#2. move images & videos to the the LIB
+#
+    _dir=''
+    _file=''
+#
+    showNor " *  |moving images & videos\n" 
+    while read x; do
+        _tmpStr=$($_cmd4HashSum -b "$x") ; 
+        _tmpStr=${_tmpStr%% *}
+        _dir=${_tmpStr:0:2} ; 
+        _file=${_tmpStr:2}
+        _tmpStr="$_workDir/$_dir/$_file"
+        _cmd="mv -n '$x' '$_tmpStr'"
+        showNor "\r ${_idc[i++%4]}  |$_cmd$ctrl_k" 
+        [[ -f "$_tmpStr" ]] && mvCursor g 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
+        [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
+        logThis "$_cmd"
+        execThis "$_cmd"
+    done <$_tmpListFile
+    mvCursor u
+    showNor "\rdone\n\rdone\n" 
+
+#3. make indexing
+#   the format of content from .log is:
+#   mv -n ``source" "dest_named_by_hashcode"
+#   mv -n "A" "B"
+#   `A' is source file name, may include `"'
+#   `B' is the destination file, named by its own hash-code
+#   we need extractor the Extension of `A' and concatenate with `B'.
+#   as `A' may include `"', substitute all `"' out of `A' is a good idea
+#   first, remove _head and _tail.  <-- easy to do
+#   then we get ``A_middleB" ,save it to the hold place of ``sed",
+#   next, remove _middle an `B'.
+#   It's easy to approach as `B' has such a reqular name.
+#   now, we get the `A', the hardest part to extractor :)
+#   ...
+#
+    _head="^mv -n '"
+    _middle="' '"
+    _tail="'$"
+#
+    showNor " *  |making index" 
+    sed -En "
+    /$_head/{
+        s/$_head|$_tail//g
+        h
+        s/^.*$_middle//
+        x
+        s/$_middle[^ ]*$//
+        s/^.*\.//
+        H
+        x
+        s/\n/./
+        p
+    } " $_tmpLogFile >>"$_indexFile"
+#
+    _cmd="
+        sort -u $_indexFile >$_tmpFile ;
+        cp $_tmpFile $_indexFile ;"
+    logThis "$_cmd"
+    execThis "$_cmd"
+    showNor "\rdone\n" 
+#
+
+#z. make the workdir clean
+#rm $_tmpListFile
+#rm $_tmpSeedsFile
+#rm $_tmpLogFile
+    rm $_tmpFile
+    rm $_tmpFile2
+    showHi "
+    \r  $_tmpSeedsFile <- file types shall be processed
+    \r  $_tmpListFile <- files shall be processed
+    \r  $_tmpLogFile  <- runing log\n"
+    showWarn "  The above 3 files are processing logs. you can remove them safety.\n" 
+#
+    showHi "
+    \r  $_indexFile <- pic&vid database\n" 
+    showWarn "  The .INDEX file is very important.\n" 
+    showAlrt "  DO NOT remove it!!\n\n" 
+    
+#
+#   showCursor
 #============================================================================
 
 #check the functional of \033[N`x', which `x' will change from a~z & A~Z
-function show()
-{
-    echo -ne "\033[$1;$2H$3"
-}
-
-echo -ne "\033[2J"
-
-local -i x y
-
-
-for ((x = 1;x<=43;x++)) {
-    for ((y=0;y<=160;y+=10)){
-        [[ $x -eq 1 ]] && str=$y || str=.
-        [[ $y -eq 0 && ${x##?} -eq 0 ]] && str=$x
-        echo -ne "\033[${x};${y}H${str%%0}"
-    }
-}
-
-show 10 50 X
-show 30 100 X
-show 30 100
-x=10
-for dir in {A..Z}
-do
-    read -n1 c
-    echo -ne "\033[$x$dir$dir----------"
-    show 30 100 X
-done
+#function show()
+#{
+#    echo -ne "\033[$1;$2H$3"
+#}
+#
+#echo -ne "\033[2J"
+#
+#declare -i x y
+#
+#    blinkCursor
+#    exit 1
+#
+#for ((x = 1;x<=43;x++)) {
+#    for ((y=0;y<=160;y+=10)){
+#        str='.'
+#        [[ $x -eq 1 ]] && str=$y
+#        [[ $y == 0 && ${x##?} == 0 ]] && str=$x
+#        echo -ne "\033[${x};${y}H${str%%0}"
+#    }
+#}
+#
+#show 10 50 X
+#show 30 100 X
+#show 30 100
+#x=10
+#for dir in {A..Z}
+#do
+#    read -n1 c
+#    show 2 4 "$x;$dir"
+#    show 30 100 X
+#    echo -ne "\033[$x$dir$dir----------"
+#done
 #============================================================================
 
 
