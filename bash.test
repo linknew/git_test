@@ -1,10 +1,11 @@
 #! /bin/bash
 
 ctrl_k=$'\e[K'
-
+#
+#
 #functions for cursor operating
 #
-function mvCursor()
+function _mvCursor()
 {
 #Descriptions:
 #   move cursor.
@@ -23,6 +24,31 @@ function mvCursor()
     local _direction=`echo $1 | tr ludgjr DABGHC`
     echo -ne "\033[${2:-1}${3:+;$3}${_direction}"
 }
+function cursorLeft()
+{
+    _mvCursor l $1
+}
+function cursorRight()
+{
+    _mvCursor r $1
+}
+function cursorUp()
+{
+    _mvCursor u $1
+}
+function cursorDown()
+{
+    _mvCursor d $1
+}
+function cursorHor()
+{
+    _mvCursor g $1
+}
+function cursorTo()
+{
+    _mvCursor j $1 $2
+}
+
 #
 #
 function hideCursor()
@@ -76,7 +102,7 @@ function getCurPos()
 #============================================================================
 
 #functions for screen operating.
-function clrScr()
+function _clrScr()
 {
 #Descriptions:
 #   clear screen, using ANSI $'\e[nJ'
@@ -87,7 +113,19 @@ function clrScr()
 #       `h' clearing whole screen, mappint to `2'  <-- the default
 #
     local _type=`echo $1 | tr abh 102`
-    echo -n $'\e[${_type}J'
+    echo -ne "\e[${_type}J"
+}
+function clrScr()
+{
+    _clrScr h
+}
+function clrUpScr()
+{
+    _clrScr a
+}
+function clrDnScr()
+{
+    _clrScr b
 }
 #
 #
@@ -102,11 +140,23 @@ function clrInLine()
 #       `h' clearing whole line, mapping to `2'
 #   
     local _type=`echo $1 | tr ahb 120`
-    echo -n $'\e[${_type}K'
+    echo -ne "\e[${_type}K"
+}
+function clrLine()
+{
+    _clrInLine h
+}
+function clrHeadLine()
+{
+    _clrInLine a
+}
+function clrTailLine()
+{
+    _clrInLine b
 }
 #
 #
-function scrlScr()
+function _scrlScr()
 {
 #Descriptions:
 #   scroll screen, using ANSI $'\e[nS' for up and $'\e[nT' for down
@@ -117,22 +167,12 @@ function scrlScr()
 #   $2, scroll line numbers
 #   
     local _type=`echo $1 | tr ud ST`
-    echo -n $'\e[${2:-1}${_type}'
+    echo -ne "\e[${2:-1}${_type}"
 }
 #============================================================================
 
 #functions for functional message displaying
-#
-shopt -s expand_aliases
-#
-alias showNor='showMsg N'
-alias showHi='showMsg H'
-alias showWarn='showMsg W'
-alias showErr='showMsg E'
-alias showOk='showMsg S'
-alias showFail='showMsg F'
-#
-function showMsg()
+function _showMsg()
 {
 #Descriptions:
 #   display functional messages such as Warning,Error,Fail...
@@ -163,6 +203,35 @@ function showMsg()
     esac
 #
     echo -ne "$_color$2$_colrN"
+}
+#
+function showMsg()
+{
+    _showMsg N $1
+}
+function showNor()
+{
+    _showMsg N $1
+}
+function showHi()
+{
+    _showMsg H $1
+}
+function showWarn()
+{
+    _showMsg W $1
+}
+function showErr()
+{
+    _showMsg E $1
+}
+function showOk()
+{
+    _showMsg S $1
+}
+function showFail()
+{
+    _showMsg F $1
 }
 #============================================================================
 
@@ -853,12 +922,12 @@ function showMsg()
 #        _tmpStr="$_workDir/$_dir/$_file"
 #        _cmd="mv -n '$x' '$_tmpStr'"
 #        showNor "\r ${_idc[i++%4]}  |$_cmd$ctrl_k" 
-#        [[ -f "$_tmpStr" ]] && mvCursor g 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
+#        [[ -f "$_tmpStr" ]] && cursorHor 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
 #        [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
 #        logThis "$_cmd"
 #        execThis "$_cmd"
 #    done <$_tmpListFile
-#    mvCursor u
+#    cursorUp
 #    showNor "\rdone\n\rdone\n" 
 #
 ##3. make indexing
@@ -925,34 +994,78 @@ function showMsg()
 #============================================================================
 
 #check the functional of \033[N`x', which `x' will change from a~z & A~Z
-function show()
+function _show()
 {
-    echo -ne "\033[$1;$2H$3"
+#   $1 dir
+#   $2 line
+#   $3 col
+
+    local _j;
+    local _c;
+    local _line=$2
+    local _col=$3
+    local _curDir=$1
+    local _newDir='';
+    local -a _dirs=('^' '>' 'v' '<');
+
+    while read -n1 _c; do
+        showHi "$_c\n" >>.log
+        case $_c in
+            0|4|8|c) _newDir=0 ;;
+            1|5|9|d) _newDir=1 ;;
+            2|6|a|e) _newDir=2 ;;
+            3|7|b|f) _newDir=3 ;;
+            *) continue ;; #_newDir=0 ;;
+        esac
+
+        for(( _j=0; ; _j++)){
+        [[ ($_newDir == 0 && $_curDir == 2) ||
+           ($_newDir == 2 && $_curDir == 0) ||
+           ($_newDir == 1 && $_curDir == 3) ||
+           ($_newDir == 3 && $_curDir == 1) ||
+           ($_newDir == 0 && $_line == 1) ||
+           ($_newDir == 1 && $_col == $_width) ||
+           ($_newDir == 2 && $_line == $_height) ||
+           ($_newDir == 3 && $_col == 1) ]] && _newDir=$(( (_newDir+1)%4 )) || break
+           [[ $_j -gt 2 ]] && showErr "\rDesign Error!\n" >&2 && exit 9
+        }
+
+        case $_newDir in
+            0) (( _line -- )) ;;
+            1) (( _col ++ )) ;;
+            2) (( _line ++ )) ;;
+            3) (( _col -- )) ;;
+            *) showErr "\rDesign Error!\n" >&2 && exit 9
+        esac
+
+        cursorTo $_line $_col >/dev/tty
+        showMsg $_c >/dev/tty
+        showMsg "($_line,$_col)${_dirs[$_curDir]},${_dirs[$_newDir]},$_c\n" >> .log
+        _curDir=$_newDir
+    done
+
+    echo ";$_curDir;$_line;$_col"
 }
 
-echo -ne "\033[2J"
 
-local -i x y
+_width=1
+_height=1
+_str=''
+_continue="0 22 84"
 
+_clrScr
 
-for ((x = 1;x<=43;x++)) {
-    for ((y=0;y<=160;y+=10)){
-        [[ $x -eq 1 ]] && str=$y || str=.
-        [[ $y -eq 0 && ${x##?} -eq 0 ]] && str=$x
-        echo -ne "\033[${x};${y}H${str%%0}"
-    }
+#1. get screen width & height
+_str=$( stty -a | sed -n '/rows.*columns/{s/.*\(rows.*columns[^;]*\);.*/\1/;p}' )
+_width=${_str##* }
+_height=${_str#* };_height=${_height%%;*}
+
+#2. display the content
+for(( i=0; ; i++ )){
+    _str=$(echo $i | sha1sum | sed 's/ .*//')
+    _continue=$(echo $_str | _show $_continue)
+    _continue=${_continue//;/ }
+#echo $_continue
 }
 
-show 10 50 X
-show 30 100 X
-show 30 100
-x=10
-for dir in {A..Z}
-do
-    read -n1 c
-    echo -ne "\033[$x$dir$dir----------"
-    show 30 100 X
-done
 #============================================================================
-
-
