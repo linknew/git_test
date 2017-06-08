@@ -492,6 +492,68 @@ void test10(void)
     return ;
 }
 
+namespace test11_space{
+        
+    int permutation(char *buff, int begin, int end, int count )
+    {
+        int i = 0;
+        int j = 0;
+        int t = 0;
+
+        if (!buff || count <0 || begin < 0 || end < 0)
+            return -1 ;
+
+        if (0 == count){
+            for(j=0;j<=begin-1;j++)
+                cout << buff[j] ;
+            cout << endl ;
+            return 0;
+        }
+
+        for (i = begin; i <= end; i++){
+            t = buff[begin] ; buff[begin] = buff[i]; buff[i] = t ;
+            if(-1 == permutation(buff, begin+1, end, count-1))
+                return -1 ;
+            t=buff[begin] ; buff[begin]= buff[i]; buff[i] = t ;
+        }
+
+        return 0;
+    }
+
+    int combination(char *buff, int number, int count)
+    {
+        int i = 0 ;
+
+        if(number < count)
+            return -1 ;
+
+        for(i=0; i<number; i++){
+            cout << buff[i];
+            combination(buff+i+1, number-i-1, count-1);
+            cout << endl ;
+        }
+
+        /* does not completed!! */
+        /* cannot display the result */
+        /* maybe, we need a tree to record the processing */
+
+        return 0 ;
+    }
+}
+
+// a implementation of permutation & combination
+void test11(void)
+{
+    using namespace test11_space ;
+
+    char A[100]={'a','b','c','d'} ;
+
+    cout << endl << permutation(A,0,3,2) << endl ;
+    cout << endl << combination(A,4,2) << endl ;
+
+    return ;
+}
+
 int main(void)
 {
     //test1();
@@ -503,7 +565,8 @@ int main(void)
     //test7();
     //test8();
     //test9();
-    test10();
+    //test10();
+    test11();
 
     return 0 ;
 }
