@@ -554,19 +554,132 @@ void test11(void)
     return ;
 }
 
+namespace test12_space{
+
+    inline void xchg(int *p, int *q)
+    {
+        int t=0;
+
+        if(!p || !q)
+            cout << "ERROR!!!" << endl ;
+
+        t=*p; *p=*q; *q=t;
+
+        return ;
+    }
+    
+    // l - loading
+    // n - number of items
+    // w - weights of items
+    // v - value of items
+    // return the optimal values
+    // this function will take a long time, refer to note_1 & note_2
+    int f(int l, int n, int *w, int *v)
+    {
+        int i=0;
+        int t=0;
+        int m=0;
+
+        if(l<=0||n<=0){
+            return 0 ;
+        }
+
+        for(i=0;i<n;i++){
+            if(l<w[i])
+                continue;
+
+            // note_1, this will change w & v
+            xchg(&w[i],&w[n-1]);            
+            xchg(&v[i],&v[n-1]);
+
+            // not_2, the return value of f(...) depends on w & v
+            // as w & v alwasy in changging, 
+            // the result of previous f(...) cannot be reused.
+            t=v[n-1]+f(l-w[n-1],n-1,w,v);   
+                                            
+            if(t>m)
+                m=t;
+
+            xchg(&w[i],&w[n-1]);
+            xchg(&v[i],&v[n-1]);
+        }
+
+        return m ;
+    }
+
+    // exercise 16.2-2 of Introduction_of_algorithms
+    int f_dynamic_programing(int l, int n, int* w, int *v, void* map)
+    {
+        int t = 0;
+        int ret = 0;
+        int (*p)[n] ;       // <-- support by C99!!!
+
+        if(!w||!v||!map)
+            return -1 ;
+
+        p=(int(*)[n])map;
+
+        if(p[l-1][n-1]!=-1)
+            return p[l-1][n-1];
+
+        if(l<=0||n<=0)
+            return 0 ;
+
+        // the n'th item is too heavy
+        if(l<w[n-1])
+            ret=f_dynamic_programing(l,n-1,w,v,map) ;
+
+        // the n'th item can be put in the knapsack
+        else{
+            // the n'th item is in the knapsack.
+            t=f_dynamic_programing(l-w[n-1],n-1,w,v,map)+v[n-1];
+            ret=(t>ret)?t:ret;
+
+            // the n'th item is not in the knapsack
+            t=f_dynamic_programing(l,n-1,w,v,map);
+            ret=(t>ret)?t:ret;
+        }
+
+        p[l-1][n-1]=ret;
+        return ret ;
+    }
+}
+
+// a implementation of 0-1 knapsack problem
+void test12(void)
+{
+    using namespace test12_space;
+
+    int w[]={10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,30};
+    int v[]={10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,10,20,50,80,90};
+
+    int i=0;
+    int l=150;
+    int n=sizeof(w)/sizeof(int);
+    int map[l][n];
+
+    for(i=0;i<l*n;i++)
+        ((int*)map)[i]=-1;
+
+    //cout << f(l,n,w,v) << endl ;      // <-- too slow!!!
+    cout << f_dynamic_programing(l,n,w,v,map) << endl ;
+    return ;
+}
+
 int main(void)
 {
-    //test1();
-    //test2();
-    //test3() ;
-    //test4();
-    //test5();
-    //test6();
-    //test7();
-    //test8();
-    //test9();
+    test12();
+    //test11();
     //test10();
-    test11();
+    //test9();
+    //test8();
+    //test7();
+    //test6();
+    //test5();
+    //test4();
+    //test3() ;
+    //test2();
+    //test1();
 
     return 0 ;
 }
