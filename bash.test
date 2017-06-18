@@ -468,7 +468,7 @@ function showAlrt()
 #done
 #============================================================================
 
-#read
+##read
 #read x y <<< 1\ 2
 #echo '$x='$x,'$y='$y
 #read -n1 x             #only accept one character
@@ -482,13 +482,37 @@ function showAlrt()
 #y+="$x"
 #done
 #echo $y                #`y' is empty because PIPE use different process...
+#
 ##we can use:
 #while read x
 #do
 #y+="$x"
 #done < aFile           #redirect the standard input. 
 #echo "$y"              #keep the read in the main process
-#============================================================================
+#
+#read has a good use for dealing with `space'
+#i='a
+#b c
+#d'
+#for j in $i
+#do
+#echo "$j"
+#done
+##the result is 
+##a
+##b
+##c
+##d
+##that is not we wanted, we can do like this
+#while read x
+#do
+#echo "$x"
+#done <<END
+#a
+#b  c
+#d
+#END
+##============================================================================
 
 #set
 #set a b c d e && echo "$# $*"  #set arguments ($0,$1,...)
@@ -818,7 +842,7 @@ function showAlrt()
 #
 #============================================================================
 
-#arrange images by date
+##arrange images by date
 #function logThis()
 #{
 ##Parameters:
@@ -992,7 +1016,7 @@ function showAlrt()
 #    
 ##
 ##   showCursor
-#============================================================================
+##============================================================================
 
 #check the functional of \033[N`x', which `x' will change from a~z & A~Z
 function _show()
