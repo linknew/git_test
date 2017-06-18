@@ -934,6 +934,7 @@ logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
     showMsg "\rdone\n" 
 
 #2. move images & videos to the the LIB
+#   if a pic/video is already exist, we keep the older one!!
 #
     _dir=''
     _file=''
@@ -945,9 +946,9 @@ logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
         _dir=${_tmpStr:0:2} ; 
         _file=${_tmpStr:2}
         _tmpStr="$_workDir/$_dir/$_file"
-        _cmd="mv -n '$x' '$_tmpStr'"
+        _cmd="mv -f '$x' '$_tmpStr'"
         showMsg "\r ${_idc[i++%4]}  |$_cmd$ctrl_k" 
-        [[ -f "$_tmpStr" ]] && cursorHor 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
+        [[ -f "$_tmpStr" ]] && [[ "$x" -nt "$_tmpStr" ]] && cursorHor 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
         [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
         logThis "$_cmd"
         execThis "$_cmd"
