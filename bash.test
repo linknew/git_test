@@ -948,7 +948,7 @@ logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
         _tmpStr="$_workDir/$_dir/$_file"
         _cmd="mv -f '$x' '$_tmpStr'"
         showMsg "\r ${_idc[i++%4]}  |$_cmd$ctrl_k" 
-        [[ -f "$_tmpStr" ]] && [[ "$x" -nt "$_tmpStr" ]] && cursorHor 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
+        [[ -f "$_tmpStr" ]] && [[ ! "$x" -ot "$_tmpStr" ]] && cursorHor 12 && showFail "$x == $_tmpStr\n" >&2 && continue;
         [[ -d "$_workDir/$_dir" ]] || mkdir "$_workDir/$_dir"
         logThis "$_cmd"
         execThis "$_cmd"
@@ -958,8 +958,8 @@ logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
 
 #3. make indexing
 #   the format of content from .log is:
-#   mv -n ``source" "dest_named_by_hashcode"
-#   mv -n "A" "B"
+#   mv -f ``source" "dest_named_by_hashcode"
+#   mv -f "A" "B"
 #   `A' is source file name, may include `"'
 #   `B' is the destination file, named by its own hash-code
 #   we need extractor the Extension of `A' and concatenate with `B'.
@@ -971,13 +971,14 @@ logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
 #   now, we get the `A', the hardest part to extractor :)
 #   ...
 #
-    _head="^mv -n '"
+    _head="^mv -f '"
     _middle="' '"
     _tail="'$"
 #
     showMsg " *  |making index" 
     sed -En "
     /$_head/{
+        s+//+/+g
         s/$_head|$_tail//g
         h
         s/^.*$_middle//
@@ -997,7 +998,8 @@ logThis $'\n----------------------------------------- '"[$(date)]" -p >&2
     execThis "$_cmd"
     showMsg "\rdone\n" 
 #
-
+#4. colect information
+#
 #z. make the workdir clean
 #rm $_tmpListFile
 #rm $_tmpSeedsFile
