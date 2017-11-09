@@ -1,5 +1,9 @@
 #! /bin/bash
 
+#use -v var=val
+#set the variable var to the value val before execution of the program begins.
+#awk -v flag="true" 'BEGIN{ print flag }' t
+
 # use regexp in statement
 #awk '{ if ($0 ~ /regexp/) print $0 }' t
 #awk '{ if ($0 !~ /regexp/) print $0 }' t
@@ -100,7 +104,7 @@
 #            print array[i,j]
 #
 #    for (l in array)
-#        print array[l]
+#        print l,array[l]
 #}'
 
 #functions for string manipulation
